@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Katharinas HTB 2027 · Episoden-Rechner</title>
+<style>
+:root { --blue: #2a52be; --blue2: #1b2a4a; --ink: #29213a; --muted: #655b70; --gold: #e7c26a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--ink); background: #e9eef8; }
+button { font: inherit; cursor: pointer; }
+.app { width: min(100%, 440px); min-height: 100svh; margin: 0 auto; padding: 6px; display: flex; flex-direction: column; gap: 5px; }
+.top { background: var(--blue2); color: #fff; border-radius: 16px; padding: 8px 12px; text-align: center; border-bottom: 3px solid var(--gold); }
+.top h1 { font-size: 1.02rem; line-height: 1.1; margin: 0 0 3px; letter-spacing: .02em; white-space: nowrap; }
+.top p { margin: 0; font-size: .74rem; color: #dbe6ff; }
+.counter { text-align: center; color: var(--blue); font-weight: 700; font-size: .72rem; letter-spacing: .08em; margin: -2px 0; }
+.card { background: #fff; border: 1px solid #c3cdea; border-radius: 18px; overflow: hidden; box-shadow: 0 4px 16px #30204312; display: flex; flex-direction: column; justify-content: center; flex: 1; min-height: 0; cursor: pointer; position: relative; }
+.rubric { position: absolute; top: 10px; right: 14px; font-size: .68rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #b0bfe0; }
+.card:active { transform: translateY(2px); }
+.bd-badge { display: none; font-size: .74rem; font-weight: 700; color: var(--blue); background: #e9eefb; border: 1px solid #b6c6ee; border-radius: 999px; padding: 4px 14px; line-height: 1.5; }
+.bd-badge.show { display: inline-block; }
+.en { padding: 10px 16px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 7px; }
+.label { font-size: .72rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: #8d9dc4; }
+.eng { font-size: clamp(1.8rem, 7.5vw, 2.5rem); line-height: 1.12; font-weight: 800; overflow-wrap: break-word; }
+.rule { width: 38px; height: 2.5px; background: #8d9dc4; border-radius: 999px; margin: 8px auto; }
+.de { padding: 10px 16px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 7px; }
+.transl { font-size: clamp(0.98rem, 4.2vw, 1.35rem); line-height: 1.3; font-weight: 700; color: var(--blue2); overflow-wrap: break-word; }
+.nav { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.nav-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.nav button, .nav-row2 button, .print-btn { display: block; width: 100%; border: 0; border-radius: 999px; padding: 8px 6px; font-size: .7rem; font-weight: 700; white-space: nowrap; background: var(--blue2); color: #fff; }
+.nav button:disabled { opacity: .35; cursor: default; }
+#speakBtn.active { background: #a33; }
+footer { text-align: center; font-size: .68rem; color: var(--muted); padding: 0 2px; }
+footer .row1 { display: flex; align-items: center; justify-content: space-between; }
+footer .mid { text-align: center; flex: 1; }
+footer .row2 { display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 3px; cursor: pointer; }
+footer a { color: var(--muted); text-decoration: underline; cursor: pointer; }
+.fold-wrap { perspective: 300px; width: 44px; height: 26px; flex-shrink: 0; }
+.foldcard { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; animation: fold 6s ease-in-out infinite; }
+@keyframes fold { 0%, 18% { transform: rotateY(0deg); } 42%, 72% { transform: rotateY(-150deg); } 96%, 100% { transform: rotateY(0deg); } }
+.foldface { position: absolute; inset: 0; backface-visibility: hidden; border: 1px solid #cbbde0; border-radius: 4px; background: #fff; display: flex; align-items: center; justify-content: center; font-size: .5rem; font-weight: 700; letter-spacing: .04em; color: var(--blue2); overflow: hidden; }
+.foldface.back { transform: rotateY(180deg); font-size: .42rem; font-weight: 400; color: var(--muted); }
+.studio-panel { position: fixed; left: 0; right: 0; bottom: 0; margin: 0 auto; max-width: 440px; background: #141021; color: #fff; border-radius: 18px 18px 0 0; transform: translateY(105%); transition: transform .45s ease; z-index: 40; box-shadow: 0 -8px 30px rgba(20,16,33,.35); cursor: pointer; }
+.studio-panel.open { transform: translateY(0); }
+.studio-inner { padding: 26px 20px 22px; text-align: center; }
+.studio-title { font-size: 1.05rem; font-weight: 800; letter-spacing: .12em; }
+.studio-title2 { font-size: 1.05rem; font-weight: 400; letter-spacing: .12em; margin-top: 2px; }
+.studio-rule { width: 56px; height: 2.5px; background: #c9ad68; border-radius: 999px; margin: 10px auto; }
+.studio-sub { font-size: .74rem; letter-spacing: .14em; color: #c9ad68; }
+.overlay { display: none; position: fixed; inset: 0; background: rgba(27,42,74,.55); z-index: 50; padding: 20px; overflow-y: auto; }
+.overlay.open { display: flex; align-items: center; justify-content: center; }
+.dlg { background: #fff; border-radius: 18px; padding: 22px; max-width: 400px; width: 100%; box-shadow: 0 20px 50px rgba(0,0,0,.3); max-height: 86vh; overflow-y: auto; }
+.dlg h3 { margin: 0 0 10px; color: var(--blue2); }
+.dlg p { font-size: .85rem; line-height: 1.45; margin: 0 0 10px; }
+.dlg button { margin-top: 6px; border: 0; border-radius: 12px; padding: 10px 20px; font-weight: 700; background: var(--blue2); color: #fff; }
+/* Startseite */
+.start { position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center; text-align: center; padding: 14px; overflow-y: auto; color: #fff; background: linear-gradient(160deg, #101c36 0%, #1b2a4a 45%, #2a52be 100%); cursor: pointer; }
+.start.gone { display: none; }
+.start-inner { display: flex; flex-direction: column; align-items: center; gap: 10px; max-width: 340px; margin: auto; padding: 6px 0 22px; }
+.start-label { font-size: .74rem; font-weight: 700; letter-spacing: .35em; color: #dbe6ff; }
+.start-year { font-size: clamp(3.6rem, 18vw, 6rem); font-weight: 800; line-height: 1; text-shadow: 0 8px 34px rgba(0,0,0,.4); }
+.start-lion { width: 88px; height: 88px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #ffe9b8, #e7c26a 62%, #c39a45); display: flex; align-items: center; justify-content: center; font-size: 4.2rem; box-shadow: 0 12px 34px rgba(0,0,0,.38), inset 0 0 0 3px rgba(255,255,255,.4); }
+.start-sub { font-size: .85rem; line-height: 1.5; color: #dbe6ff; }
+.start-ep { font-size: .8rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--gold); margin-top: 12px; }
+.start-btn { border: 0; border-radius: 999px; padding: 12px 28px; font-weight: 700; font-size: .9rem; background: var(--gold); color: #1b2a4a; box-shadow: 0 8px 22px rgba(0,0,0,.35); }
+.start-btn2 { border: 1px solid rgba(231,194,106,.8); border-radius: 999px; padding: 8px 20px; font-weight: 700; font-size: .75rem; background: transparent; color: #e7c26a; }
+.start-frame { display: flex; flex-direction: column; align-items: center; gap: 10px; border: 1.5px solid rgba(231,194,106,.7); border-radius: 20px; padding: 30px 22px 28px; box-shadow: 0 0 0 6px rgba(231,194,106,.12), 0 24px 60px rgba(0,0,0,.35), inset 0 0 50px rgba(0,0,0,.28); background: radial-gradient(ellipse at top, rgba(42,82,190,.35), transparent 70%); }
+.start-name { font-family: Georgia, 'Times New Roman', serif; font-style: italic; font-size: clamp(2.1rem, 10vw, 2.7rem); color: #e7c26a; letter-spacing: .05em; line-height: 1.1; text-shadow: 0 4px 18px rgba(0,0,0,.4); }
+.start-birth { font-size: .8rem; font-weight: 700; letter-spacing: .28em; text-transform: uppercase; color: #dbe6ff; }
+.start-orn { font-size: .62rem; letter-spacing: .1em; color: rgba(231,194,106,.9); }
+.print-only { display: none; }
+@media print {
+  @page { size: A4 portrait; margin: 8mm; }
+  html, body { background: #fff !important; margin: 0 !important; padding: 0 !important; }
+  html, body, main, section, div { width: auto !important; max-width: none !important; }
+  body { min-height: 0 !important; }
+  .app { display: none !important; }
+  .overlay { display: none !important; }
+  .studio-panel { display: none !important; }
+  .start { display: none !important; }
+  .print-only { display: block !important; width: 194mm !important; max-width: 194mm !important; margin: 0 !important; }
+  .print-heading { display: flex; align-items: center; justify-content: space-between; font-size: 9pt; color: #555; font-weight: 700; padding: 0 0 2mm; width: 192mm; margin: 0; }
+  .sheet { display: grid; grid-template-columns: repeat(5, 36mm); grid-auto-rows: 42mm; gap: 2.4mm 2.6mm; padding: 0 0 4mm; width: 192mm; margin: 0; page-break-after: always; position: relative; box-sizing: content-box; }
+  .sheet:last-child { page-break-after: auto; }
+  .chip { border: 0.35mm dashed #999; padding: 1mm 1.4mm 1.4mm; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; overflow: hidden; break-inside: avoid; }  /* gestrichelte Linie = Schneidelinie */
+  .c-glue { width: 100%; border-bottom: 0.25mm dotted #ccc; margin-bottom: 1.1mm; flex: none; }  /* Klebefläche oben */
+  .chip .c-top { display: block; width: 100%; margin-bottom: 1.2mm; }  /* Episode-Zeile, darunter Datum */
+  .chip .c-label { display: block; font-size: 5pt; font-weight: 700; letter-spacing: .04em; color: #2a52be; }
+  .chip .c-rub { display: block; font-size: 5.2pt; font-weight: 400; letter-spacing: .04em; color: #666; margin-top: 0.3mm; }
+  .chip .eng { font-size: 7.6pt; font-weight: 400; color: #1b2a4a; line-height: 1.12; overflow-wrap: break-word; }
+  .chip .eng::first-line { font-weight: 800; }  /* nur die erste Zeile fett */
+  .chip .rule { width: 8mm; height: 0.4mm; background: #bbb; margin: 1.8mm 0; }
+  .chip .de { font-size: 6.2pt; font-weight: 400; color: #333; line-height: 1.12; overflow-wrap: break-word; }
+  .chip .c-auth { font-size: 6pt; font-weight: 400; color: #777; margin-top: 1mm; }
+  .chip .c-bd { font-size: 5.4pt; font-weight: 700; color: #2a52be; margin-top: 0.8mm; line-height: 1.25; }
+  .year-end { grid-column: 1 / -1; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 12pt; font-weight: 700; color: #1b2a4a; border: 0.4mm dashed #e7c26a; border-radius: 4mm; margin-top: 2mm; }
+  .chip.lg .de { font-size: 5.8pt; }
+  .chip.xl .de { font-size: 5.2pt; }
+  .chip.lg .eng { font-size: 6.9pt; } .chip.xl .eng { font-size: 6pt; }
+  .sheet-footer { position: absolute; bottom: 0.5mm; left: 0; width: 100%; text-align: center; font-size: 6pt; color: #aaa; }  /* im unteren Randbereich, ohne Kartenreihe */
+  .chip.cv { background: linear-gradient(160deg, #101c36 0%, #1b2a4a 45%, #2a52be 100%); border: 0.35mm dashed #999; }  /* Deckblatt als kleine Karte */
+  .chip.cv .c-glue { border-bottom: 0.25mm dotted rgba(231,194,106,.6); }
+  .cv-label2 { font-size: 3.6pt; font-weight: 700; letter-spacing: .18em; color: #dbe6ff; line-height: 1.5; }
+  .cv-year2 { font-size: 15pt; font-weight: 800; line-height: 1; color: #fff; }
+  .cv-lion2 { font-size: 16pt; line-height: 1.15; }
+  .cv-name2 { font-family: Georgia, 'Times New Roman', serif; font-style: italic; font-size: 7.5pt; color: #e7c26a; }
+  .cv-orn2 { font-size: 3.4pt; letter-spacing: .1em; color: #e7c26a; }
+  .cv-sub2 { font-size: 4.2pt; line-height: 1.5; color: #dbe6ff; }
+  .cv-inner { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 8mm; border: 1.2mm solid #e7c26a; margin: 10mm; padding: 8mm; }
+  .cv-label { font-size: 11pt; font-weight: 700; letter-spacing: .5em; color: #dbe6ff; }
+  .cv-year { font-size: 60pt; font-weight: 800; line-height: 1; color: #fff; }
+  .cv-lion { font-size: 56pt; line-height: 1; }
+  .cv-orn { font-size: 10pt; letter-spacing: .1em; color: #e7c26a; }
+  .cv-name { font-family: Georgia, 'Times New Roman', serif; font-style: italic; font-size: 30pt; color: #e7c26a; }
+  .cv-birth { font-size: 11pt; font-weight: 700; letter-spacing: .25em; text-transform: uppercase; color: #dbe6ff; }
+  .cv-sub { font-size: 9.5pt; line-height: 1.7; color: #dbe6ff; }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+</style>
+</head>
+<body>
+<div class="start" id="startPage" aria-label="Startseite">
+  <div class="start-inner">
+    <div class="start-frame">
+      <div class="start-label">Nathalies Hosentaschenbuch</div>
+      <div class="start-year">2027</div>
+      <div class="start-lion" aria-hidden="true">♉</div>
+      <div class="start-orn" aria-hidden="true">✦ ─── ✦ ─── ✦</div>
+      <div class="start-name">Nathalie</div>
+      <div class="start-sub">Jahresband · 365 Tage des Jahres 2027<br>Episoden · vom 01.01. bis 31.12.</div>
+    </div>
+    <div class="start-ep" id="startEp"></div>
+    <button class="start-btn" id="startBtn" type="button">Kalender öffnen →</button>
+    <button class="start-btn2" id="startTopBtn" type="button">Zum Anfang · 01.01.2027</button>
+  </div>
+</div>
+<main class="app">
+  <header class="top">
+    <h1 id="titleBtn" title="Deckblatt öffnen" style="cursor:pointer">Nathalies HTB · 2027</h1>
+    <p>Jahresband · ♉ · 365 Tage des Jahres 2027<br>Version 2.9.7</p>
+  </header>
+  <div class="counter" id="counter">TAG 01 VON 365  ·  EPISODE 14.473</div>
+  <section class="card" id="studyCard" aria-live="polite">
+    <div class="rubric" id="rubric">Januar 2027</div>
+    <div class="en">
+      <div class="label" id="epLabel">Episode 24.262</div>
+      <div class="eng" id="enText">Fr · 01.01.2027</div>
+      <div class="bd-badge" id="bdBadge"></div>
+    </div>
+    <div class="rule"></div>
+    <div class="de">
+      <div class="label">Spruch des Tages</div>
+      <div class="transl" id="deText"></div>
+    </div>
+  </section>
+  <nav class="nav">
+    <button id="prevBtn" type="button">← Zurück</button>
+    <button id="nextBtn" type="button">Weiter →</button>
+  </nav>
+  <nav class="nav-row2">
+    <button id="speakBtn" type="button" aria-pressed="false">🔊 Vorlesen</button>
+    <button class="print-btn" id="printBtn" type="button">▤ Druckvorlage (30 pro A4)</button>
+  </nav>
+  <footer>
+    <div class="row1">
+      <a onclick="openDlg('dlgImp')">Impressum</a>
+      <span class="mid">© 2026</span>
+      <a onclick="openDlg('dlgDs')">Datenschutz</a>
+    </div>
+    <div class="row2" id="studioToggle" onclick="toggleStudio()" role="button" tabindex="0" aria-label="ARC(E)ANA creative studio öffnen">
+      <div class="fold-wrap" aria-hidden="true">
+        <div class="foldcard" id="foldcard">
+          <div class="foldface">A</div>
+          <div class="foldface back">▲</div>
+        </div>
+      </div>
+      <span>ARC(E)ANA creative studio</span>
+    </div>
+  </footer>
+  <div class="studio-panel" id="studioPanel">
+    <div class="studio-inner">
+      <div class="studio-title">ARC(E)ANA</div>
+      <div class="studio-title2">creative studio</div>
+      <div class="studio-rule"></div>
+      <div class="studio-sub">Entdecken · Entwickeln · Erschaffen</div>
+    </div>
+  </div>
+</main>
+<div class="overlay" id="dlgImp"><div class="dlg">
+  <h3>IMPRESSUM</h3>
+  <p><strong>Ella Pinorella Verlag · Katharina Schütz</strong><br>Herausgeberin und inhaltlich Verantwortliche<br>Platz der Einheit 10 · 14467 Potsdam · Deutschland<br>E-Mail: info@ella-pinorella.de</p>
+  <p><strong>Über dieses Hosentaschenbuch (HTB)</strong></p>
+  <p>„Nathalies HTB · 2027 – Der Jahresband“<br>365 Karten für alle Tage des Jahres 2027 – jeder Tag eine Episode deines Lebens.<br>Ein Geschenk von Katharina.</p>
+  <p>Aus dem Episoden-Rechner entstanden, jetzt als Kalenderband für 2027.<br>Mit schönen Sprüchen und Aphorismen: aus der Sammlung ihrer Mutter und Klassikern von Twain, Goethe, Schiller, Kästner, Fontane u. a.</p>
+  <p>Ein Hosentaschenbuch nach dem Lernkonzept ARC(E)ANA – Entdecken. Entwickeln. Erschaffen.</p>
+  <p>© 2026 Ella Pinorella Verlag · Katharina Schütz</p>
+  <button onclick="closeDlg('dlgImp')">Schließen</button>
+</div></div>
+<div class="overlay" id="dlgDs"><div class="dlg">
+  <h3>Datenschutzhinweise zur App</h3>
+  <p><strong>1. Allgemeines</strong><br>Diese App wurde nach dem Grundsatz der Datensparsamkeit entwickelt. Bei ihrer Nutzung werden keine personenbezogenen Daten durch die App erhoben, abgefragt, gespeichert oder an Dritte übermittelt. Eine Anmeldung, Registrierung oder Eingabe persönlicher Daten ist nicht vorgesehen.</p>
+  <p><strong>2. Keine Cookies und kein Tracking</strong><br>Die App verwendet keine eigenen Cookies und setzt keine Analyse-, Tracking- oder Werbedienste ein. Es werden keine Nutzungsprofile erstellt und keine Daten zu Werbezwecken gesammelt. Die App verwendet keinen eigenen Browser-Speicher, um personenbezogene Daten oder Nutzungsinformationen abzulegen.</p>
+  <p><strong>3. Lokale Nutzung und Offline-Funktion</strong><br>Sämtliche Inhalte und Funktionen sind Bestandteil der App. Nach dem Herunterladen kann sie ohne aktive Internetverbindung genutzt werden, sofern sie vollständig auf dem Endgerät gespeichert ist. Die App baut selbstständig keine Verbindung zu einem eigenen Anwendungsserver auf und übermittelt keine Nutzungsdaten.</p>
+  <p><strong>4. Vorlesefunktion und Klangerzeugung</strong><br>Die Vorlesefunktion nutzt die im Endgerät bzw. Browser verfügbare Sprachausgabe. Klänge und Toneffekte werden über die Funktionen des Browsers erzeugt. Die App selbst versendet keine Texteingaben, Sprachaufnahmen oder sonstigen Nutzungsdaten. Die technische Verarbeitung durch Betriebssystem, Browser oder gegebenenfalls externe Sprachdienste richtet sich nach den Geräteeinstellungen und den Datenschutzbestimmungen der entsprechenden Anbieter.</p>
+  <p><strong>5. Keine Weitergabe von Daten</strong><br>Eine Weitergabe, Vermarktung oder anderweitige Nutzung personenbezogener Daten durch die App findet nicht statt, da die App selbst keine solchen Daten erhebt oder speichert.</p>
+  <p><strong>6. Bereitstellung über eine Website</strong><br>Wird die App über eine Website aufgerufen oder mittels iframe in eine Website eingebunden, können beim Aufruf technisch notwendige Verbindungsdaten durch den Hostinganbieter verarbeitet werden (u. a. IP-Adresse, Datum und Uhrzeit des Zugriffs, technische Browserinformationen). Diese Verarbeitung betrifft den Betrieb der Website und ist von den Funktionen der App selbst zu unterscheiden. Hierfür gelten ergänzend die Datenschutzhinweise des Websitebetreibers bzw. Hostinganbieters.</p>
+  <p><strong>7. Rechtsgrundlage und Informationspflicht</strong><br>Soweit durch die App selbst keine personenbezogenen Daten verarbeitet werden, entstehen aus ihrer eigenständigen Nutzung keine Datenverarbeitungsvorgänge, über die nach Art. 13 DSGVO zu informieren wäre. Für eine gegebenenfalls stattfindende Verarbeitung durch Websitebetreiber, Hostinganbieter, Browser oder Betriebssysteme gelten die jeweiligen datenschutzrechtlichen Verantwortlichkeiten.</p>
+  <p><strong>8. Stand und Aktualität</strong><br>Diese Datenschutzhinweise beziehen sich auf die beschriebene technische Ausführung der App. Bei Änderungen der technischen Funktionen oder der eingesetzten Dienste werden sie entsprechend angepasst.</p>
+  <button onclick="closeDlg('dlgDs')">Schließen</button>
+</div></div>
+<section class="print-only" id="printArea" aria-label="Druckvorlage"></section>
+<script>
+const QUOTES = [["Gib jedem Tag die Chance, der schönste deines Lebens zu werden.","Mark Twain (zugeschrieben)"],["Es gibt nichts Gutes, außer man tut es.","Erich Kästner"],["Am Anfang war die Tat.","J. W. von Goethe"],["Der Worte sind genug gewechselt, lasst mich auch endlich Taten sehen!","J. W. von Goethe"],["Die zwei wichtigsten Tage deines Lebens sind der Tag, an dem du geboren wirst, und der Tag, an dem du verstehst, warum.","Mark Twain"],["Wer wagt, gewinnt.","Friedrich Schiller (sinngemäß)"],["Es hört doch jeder nur, was er versteht.","J. W. von Goethe"],["Lebe mit deinem Jahrhundert, aber sei nicht sein Geschöpf.","Friedrich Schiller"],["Wer nicht liest, hat gegenüber dem Menschen, der nicht lesen kann, keinen einzigen Vorteil.","Mark Twain"],["Das Wunder ist des Glaubens liebstes Kind.","J. W. von Goethe"],["In der Beschränkung zeigt sich erst der Meister.","J. W. von Goethe"],["Es irrt der Mensch, solang er strebt.","J. W. von Goethe"],["Mut ist Widerstand gegen die Angst, die Beherrschung der Angst – nicht ihre Abwesenheit.","Mark Twain"],["Der Humor ist der Regenschirm der Weisen.","Erich Kästner"],["Ein jeder kehre vor seiner Tür, und rein ist jedes Stadtquartier.","J. W. von Goethe"],["Das Leben ist lebensgefährlich.","Erich Kästner"],["In zwanzig Jahren wirst du die Dinge mehr bedauern, die du nicht getan hast, als die, die du getan hast. Also wirf die Taue los, segle aus dem sicheren Hafen und fange den Passat in deinen Segeln: Erkunde. Träume. Entdecke.","Mark Twain"],["Wer nicht weiß, wohin er will, darf sich nicht wundern, wenn er ganz woanders ankommt.","Mark Twain (zugeschrieben)"],["Es ist nicht genug zu wissen – man muss auch anwenden; es ist nicht genug zu wollen – man muss auch tun.","J. W. von Goethe"],["In der Kürze liegt die Würze.","Sprichwort"],["Eine Lüge kann halb um die Welt laufen, ehe die Wahrheit ihre Schuhe anzieht.","Mark Twain"],["Der Mensch soll lernen, nur die Ochsen büffeln.","Erich Kästner"],["Mit dem Wissen wächst der Zweifel.","J. W. von Goethe"],["Drum prüfe, wer sich ewig bindet.","Friedrich Schiller"],["Lies Gesundheitsbücher nur mit Vorsicht – du könntest an einem Druckfehler sterben.","Mark Twain"],["Es kann der Frömmste nicht in Frieden leben, wenn es dem bösen Nachbarn nicht gefällt.","Friedrich Schiller"],["Das schönste Glück des denkenden Menschen ist, das Erforschliche erforscht und das Unerforschliche ruhig verehrt zu haben.","J. W. von Goethe"],["Was heute nicht geschieht, ist morgen nicht getan.","J. W. von Goethe"],["Kleider machen den Mann. Nackte Menschen haben in der Gesellschaft wenig Einfluss.","Mark Twain"],["Ich mach ein Lied aus Stille.","Eva Strittmatter"],["Wer will, dass die Welt bleibt, wie sie ist, der will nicht, dass sie bleibt.","J. W. von Goethe"],["Eine kleine Güte. Ein Lächeln nur.","Eva Strittmatter"],["Wer die Wahrheit sagt, braucht sich nichts merken.","Mark Twain"],["Der Irrtum ist das Leben.","Friedrich Schiller (sinngemäß)"],["Erfolg hat drei Buchstaben: TUN.","J. W. von Goethe"],["Wer nichts wagt, darf nichts hoffen.","Friedrich Schiller"],["Jeder Mensch ist ein Mond und hat eine dunkle Seite, die er niemandem zeigt.","Mark Twain"],["Alles Alte, soweit es Anspruch darauf hat, sollen wir lieben.","J. W. von Goethe"],["Jedem Anfang wohnt ein Zauber inne.","Hermann Hesse"],["Glück ist manchmal nur eine Frage der Perspektive.",null],["Das Geheimnis des Vorankommens ist, anzufangen.","Mark Twain"],["Wer das Kleine nicht schätzt, wird das Große kaum erkennen.",null],["Damit das Mögliche entsteht, muss immer wieder das Unmögliche versucht werden.","Hermann Hesse"],["Das Leben wartet nicht auf den richtigen Augenblick.",null],["Fältchen sollten nur anzeigen, wo das Lächeln war.","Mark Twain"],["Manchmal ist weniger tatsächlich mehr.",null],["Das Glück ist ein Wie, kein Was – ein Talent, kein Objekt.","Hermann Hesse"],["Wer zufrieden ist, besitzt einen großen Reichtum.",null],["Ein Klassiker ist etwas, das jeder gelesen haben will, aber niemand lesen mag.","Mark Twain"],["Nicht jeder Umweg ist ein Irrweg.",null],["Lass die Schule deine Bildung nie im Wege stehen.","Mark Twain"],["Das Glück wohnt oft gleich nebenan.",null],["Humor ist, wenn man trotzdem lacht.","Erich Kästner"],["Jeder Tag ist eine neue Gelegenheit.",null],["Wenn du einen hungrigen Hund aufnimmst und ihn gut fütterst, wird er dich nicht beißen. Das ist der Hauptunterschied zwischen Hund und Mensch.","Mark Twain"],["Man muss nicht alles verstehen, um glücklich zu sein.",null],["Nur wer erwachsen wird und trotzdem Kind bleibt, ist ein Mensch.","Erich Kästner"],["Das Leben ist zu kurz für ein dauerhaftes Vielleicht.",null],["Nichts ist so reformbedürftig wie die Angewohnheiten anderer Menschen.","Mark Twain"],["Wer lachen kann, hat noch lange nicht verloren.",null],["Einbildungskraft ist wichtiger als Wissen, denn Wissen ist begrenzt.","Albert Einstein"],["Die schönsten Dinge kosten oft nichts.",null],["Die Wahrheit ist das Wertvollste, das wir besitzen. Lasst uns sparsam damit umgehen.","Mark Twain"],["Glück lässt sich nicht festhalten, aber erleben.",null],["Zwei Dinge sind unendlich: das Universum und die menschliche Dummheit – beim Universum bin ich mir allerdings nicht ganz sicher.","Albert Einstein"],["Manchmal ist Loslassen der erste Schritt zum Glück.",null],["Der Mensch ist das einzige Lebewesen, das errötet – oder der Anlass dazu sein sollte.","Mark Twain"],["Wer Augen für das Schöne hat, findet es überall.",null],["Das Schönste, was wir erleben können, ist das Geheimnisvolle.","Albert Einstein"],["Das Leben schreibt Geschichten, die kein Autor erfinden könnte.",null],["Ein Bankier leiht dir den Regenschirm, solange die Sonne scheint, und verlangt ihn zurück, sobald es regnet.","Mark Twain"],["Zufriedenheit ist Reichtum ohne Konto.",null],["Wichtig ist, nie aufzuhören zu fragen.","Albert Einstein"],["Ein guter Tag beginnt manchmal mit einem guten Gedanken.",null],["Alter ist eine Frage des Geistes: Wenn du dich nicht daran störst, spielt es keine Rolle.","Mark Twain"],["Wer sich selbst genügt, ist selten allein.",null],["Nicht weil es schwer ist, wagen wir es nicht – weil wir es nicht wagen, ist es schwer.","Seneca"],["Das Leben ist keine Generalprobe.",null],["Der beste Weg, dich selbst aufzumuntern: Versuche, jemand anderen aufzumuntern.","Mark Twain"],["Charakter zeigt sich, wenn niemand hinsieht.",null],["Es ist nicht so, dass wir wenig Zeit haben, sondern dass wir viel davon verschwenden.","Seneca"],["Nicht jeder, der lächelt, meint es ehrlich.",null],["Güte ist die Sprache, die Taube hören und Blinde sehen können.","Mark Twain"],["Vertrauen wächst langsam und zerbricht schnell.",null],["Wenn ein Mensch nicht weiß, zu welchem Hafen er segeln will, ist kein Wind für ihn günstig.","Seneca"],["Ein ehrliches Wort ist mehr wert als tausend schöne.",null],["Halte dich von Menschen fern, die deine Ambitionen kleinreden – kleine Menschen tun das. Große machen dich fühlen, dass auch du groß werden kannst.","Mark Twain"],["Wer Respekt erwartet, sollte ihn auch geben.",null],["Nicht für die Schule, sondern für das Leben lernen wir.","Seneca"],["Man erkennt Menschen nicht an ihren Worten, sondern an ihren Taten.",null],["Gegen den Ansturm des Lachens kann nichts bestehen.","Mark Twain"],["Wahre Größe braucht keine Bühne.",null],["Das Glück deines Lebens hängt von der Beschaffenheit deiner Gedanken ab.","Marc Aurel"],["Manche Begegnungen sind Geschenke, andere Lektionen.",null],["Sorge zuerst für die Fakten – dann darfst du sie nach Belieben verdrehen.","Mark Twain"],["Wer nur nimmt, wird irgendwann allein dastehen.",null],["Am Morgen, wenn du ungern aufstehst, halte dir vor Augen: Ich erwache, um zu tun, was mir als Mensch zukommt.","Marc Aurel"],["Ein guter Mensch muss nicht jedem gefallen.",null],["Ein Mann mit einer neuen Idee ist ein Spinner, bis die Idee Erfolg hat.","Mark Twain"],["Schweigen kann manchmal die klügste Antwort sein.",null],["Die beste Rache ist, sich nicht wie dein Feind zu verhalten.","Marc Aurel"],["Nicht jeder Streit verdient eine Antwort.",null],["Lauf nicht herum und sage, die Welt schulde dir ein Auskommen – die Welt schuldet dir nichts; sie war zuerst da.","Mark Twain"],["Wer andere klein macht, wird selbst nicht größer.",null],["Wer andere kennt, ist klug – wer sich selbst kennt, ist weise.","Laotse"],["Ehrlichkeit braucht manchmal Mut.",null],["Arbeit ist alles, was man tun muss; Spiel ist alles, was man tun darf, wenn man nicht arbeiten muss.","Mark Twain"],["Freundschaft erkennt man nicht am Kalender.",null],["Nichts auf der Welt ist weicher als Wasser – und doch gibt es nichts, das ihm im Widerstand überlegen wäre.","Laotse"],["Menschen ändern sich, Erinnerungen bleiben.",null],["Nichts ist schwerer zu ertragen als der Anblick eines guten Beispiels.","Mark Twain"],["Wer zuhört, erfährt mehr als derjenige, der nur redet.",null],["Wissen, dass man genug hat, ist Reichtum.","Laotse"],["Ein gutes Herz ist keine Schwäche.",null],["Für eine gute improvisierte Rede brauche ich meist mehr als drei Wochen Vorbereitung.","Mark Twain"],["Abstand schafft manchmal Klarheit.",null],["Der Edle stellt Ansprüche an sich selbst, der Geringe stellt Ansprüche an andere.","Konfuzius"],["Man kann nicht jeden mögen, aber jeden respektieren.",null],["Der Unterschied zwischen dem beinahe richtigen Wort und dem richtigen Wort ist der Unterschied zwischen Blitz und Glühwürmchen.","Mark Twain"],["Ich bin nicht schwierig, ich bin eine Herausforderung.",null],["Wähle eine Arbeit, die du liebst – dann musst du keinen Tag in deinem Leben arbeiten.","Konfuzius"],["Wer zuletzt lacht, hat es vielleicht zuerst nicht verstanden.",null],["Sei nachlässig in deiner Kleidung, wenn du willst – aber halte deine Seele ordentlich.","Mark Twain"],["Manche haben ein Brett vor dem Kopf und nennen es Weitblick.",null],["Unsere größte Ehre besteht nicht darin, nie zu fallen, sondern jedes Mal wieder aufzustehen.","Konfuzius"],["Denken ist erlaubt, aber nicht jeder macht davon Gebrauch.",null],["Vergebung ist der Duft, den das Veilchen an der Ferse verströmt, die es zerdrückt hat.","Mark Twain"],["Wer nichts weiß, muss nicht unbedingt alles erklären.",null],["Wer einen Fehler gemacht und ihn nicht korrigiert, begeht einen zweiten.","Konfuzius"],["Manche reden, damit die Stille nicht merkt, wie klug sie ist.",null],["Reisen ist tödlich für Vorurteile, Engstirnigkeit und Böswilligkeit.","Mark Twain"],["Alter schützt vor Torheit nicht, aber es gibt ihr Erfahrung.",null],["Ich habe gelernt: Die Menschen vergessen, was du gesagt hast, und was du getan hast – aber sie vergessen nie, wie du sie sich fühlen ließest.","Maya Angelou"],["Ich habe keine Macken, das sind Sonderausstattungen.",null],["Tue das, wovor du dich am meisten fürchtest, und der Tod der Angst ist gewiss.","Mark Twain"],["Wer den ganzen Tag arbeitet, hat keine Zeit, Geld zu verdienen.",null],["Versuche, der Regenbogen in der Wolke eines anderen zu sein.","Maya Angelou"],["Manche Menschen sind wie Wolken: Wenn sie verschwinden, wird es heller.",null],["Und du, Melkor, wirst sehen: Kein Thema kann gespielt werden, das nicht seinen letzten Ursprung in mir hat, noch kann jemand die Musik gegen meinen Willen verändern. Denn wer es versucht, wird sich nur als mein Werkzeug erweisen bei der Erschaffung von Dingen, die noch wunderbarer sind, als er sich je vorgestellt hat.","J. R. R. Tolkien · Das Silmarillion"],["Nicht alles, was glänzt, hat auch Verstand.",null],["Erfolg ist nie endgültig, Misserfolg niemals fatal – was zählt, ist der Mut weiterzumachen.","Winston Churchill"],["Wer immer Recht hat, hat selten Freunde.",null],["Gib deine Illusionen niemals auf. Ohne sie existierst du vielleicht noch – aber du lebst nicht mehr.","Mark Twain"],["Es gibt Menschen, die suchen Fehler und finden dabei sich selbst.",null],["Kritik mag unangenehm sein, aber sie ist notwendig.","Winston Churchill"],["Wer über sich selbst lachen kann, spart den anderen die Arbeit.",null],["Du kannst dich nicht auf deine Augen verlassen, wenn deine Einbildungskraft unscharf ist.","Mark Twain"],["Manche Probleme lösen sich, wenn man sie nicht mehr füttert.",null],["Es scheint immer unmöglich, bis es getan ist.","Nelson Mandela"],["Wer keinen Plan hat, kann wenigstens flexibel scheitern.",null],["Ein Optimist ist einer, der von einem Löwen auf einen Baum getrieben wird – und die Aussicht genießt.","Mark Twain"],["Ich bin nicht alt, ich bin ein gut erhaltenes Original.",null],["Ich habe das noch nie versucht – also glaube ich, dass ich es kann.","Pippi Langstrumpf"],["Die Dummheit ist oft erstaunlich selbstbewusst.",null],["Humor ist der größte Segen der Menschheit.","Mark Twain"],["Wer nichts zu sagen hat, findet meistens viele Worte.",null],["Alles, was man in der Kindheit geliebt hat, bleibt für immer im Besitz des Herzens.","Astrid Lindgren"],["Ein bisschen Wahnsinn hält den Alltag gesund.",null],["Donner ist gut, Donner ist eindrucksvoll – aber die Arbeit tut der Blitz.","Mark Twain"],["Wer stehen bleibt, wird vom Leben überholt.",null],["Man sieht nur mit dem Herzen gut – das Wesentliche ist für die Augen unsichtbar.","Antoine de Saint-Exupéry"],["Mut beginnt dort, wo die Angst nicht mehr entscheidet.",null],["Streite nie mit Dummköpfen – die Umstehenden könnten den Unterschied nicht bemerken.","Mark Twain"],["Du musst nicht perfekt sein, nur anfangen.",null],["Wenn du ein Schiff bauen willst, dann trommle nicht Männer zusammen, um Holz zu besorgen – sondern lehre sie die Sehnsucht nach dem weiten, endlosen Meer.","Antoine de Saint-Exupéry"],["Manchmal muss man Türen schließen, um Fenster zu entdecken.",null],["Es gibt kein traurigeres Schauspiel als einen jungen Pessimisten.","Mark Twain"],["Wer sich selbst treu bleibt, geht selten den falschen Weg.",null],["Die Zeit, die du dir für deine Rose genommen hast, macht deine Rose so wichtig.","Antoine de Saint-Exupéry"],["Stärke bedeutet nicht, niemals zu fallen.",null],["Zum Erfolg im Leben braucht man zwei Dinge: Unwissenheit und Selbstvertrauen.","Mark Twain"],["Auch kleine Schritte bringen dich voran.",null],["Der Zweck unseres Lebens ist es, glücklich zu sein.","Dalai Lama"],["Lass dir deine Träume nicht von fremden Ängsten erklären.",null],["Das Menschengeschlecht hat eine wirklich wirksame Waffe – und das ist das Lachen.","Mark Twain"],["Wer seinen eigenen Weg geht, braucht keine Wegweiser.",null],["Meine Religion ist sehr einfach – meine Religion ist die Güte.","Dalai Lama"],["Zweifel sind erlaubt, Stillstand nicht.",null],["Es ist klüger, nachzusehen als zu vermuten.","Mark Twain"],["Es ist nie zu spät, etwas Neues zu beginnen.",null],["Wenn du kannst, hilf – wenn du nicht helfen kannst, dann tu wenigstens nichts Schlimmes.","Dalai Lama"],["Wer aufgibt, bevor er angefangen hat, hat schon verloren.",null],["Nicht das Geld ist die Wurzel allen Übels – sondern der Mangel an Geld.","Mark Twain"],["Freiheit beginnt im eigenen Denken.",null],["Nicht jeder von uns kann Großes tun – aber jeder kann kleine Dinge mit großer Liebe tun.","Mutter Teresa"],["Man muss nicht laut sein, um deutlich zu werden.",null],["Iss morgens als Erstes einen lebendigen Frosch – dann ist sichergestellt, dass dir an diesem Tag nichts Schlimmeres mehr begegnet.","Mark Twain"],["Ein starker Charakter braucht keine Bestätigung.",null],["Ich bin Leben, das leben will – inmitten von Leben, das leben will.","Albert Schweitzer"],["Wer sich nicht verbiegen lässt, bleibt aufrecht.",null],["Zorn ist eine Säure, die dem Gefäß mehr schadet, in dem sie liegt, als dem, auf das sie gegossen wird.","Mark Twain"],["Jeder Neuanfang beginnt mit einem ersten Schritt.",null],["Der Vorteil der Klugheit besteht darin, dass man sich dumm stellen kann – das Gegenteil ist schon schwieriger.","Kurt Tucholsky"],["Manchmal ist Nein sagen ein Ja zu sich selbst.",null],["Die interessantesten Nachrichten bekommt man von Kindern – sie erzählen alles, was sie wissen.","Mark Twain"],["Wer seine Grenzen kennt, kann sie auch überwinden.",null],["Ein Leben ohne Mops ist möglich – aber sinnlos.","Loriot"],["Nicht die Jahre zählen, sondern die Erlebnisse.",null],["Die Berichte über meinen Tod sind stark übertrieben.","Mark Twain"],["Die Natur hat keine Eile und erreicht doch alles.",null],["Es ist ein Brauch von alters her: Wer Sorgen hat, hat auch Likör!","Wilhelm Busch"],["Nach jedem Winter kommt ein Frühling.",null],["Es gibt im Grunde zwei Arten von Menschen: solche, die Dinge vollbringen, und solche, die die Lorbeeren dafür beanspruchen.","Mark Twain"],["Ein Sonnenstrahl kann mehr bewirken als tausend Worte.",null],["Weil, so schließt er messerscharf, nicht sein kann, was nicht sein darf.","Christian Morgenstern"],["Wer die Natur beobachtet, lernt Geduld.",null],["Gesunder Menschenverstand existiert trotz der Erziehung – nicht dank ihr.","Mark Twain"],["Die schönsten Augenblicke lassen sich nicht fotografieren.",null],["Du musst dein Leben ändern.","Rainer Maria Rilke"],["Ich bin hier, um Erfahrungen zu sammeln.","Katharina Schütz"],["Zeit ist das Einzige, was wir nicht zurückkaufen können.",null],["Ein gutes Buch entsteht nicht durch das, was drinsteht, sondern durch das, was weggelassen wurde.","Mark Twain"],["Jeder Sonnenuntergang verspricht einen neuen Morgen.",null],["Versuche nicht, die Antworten zu finden – lebe die Fragen.","Rainer Maria Rilke"],["Auch ein alter Baum trägt noch Leben in sich.",null],["Schiebe nie auf morgen, was du auch übermorgen tun könntest.","Mark Twain"],["Wer den Augenblick verpasst, verpasst das Leben.",null],["Im Leben braucht man nichts zu fürchten – man muss nur alles verstehen.","Marie Curie"],["Stille ist manchmal die schönste Musik.",null],["Tue immer das Richtige: Es wird manche erfreuen und den Rest in Erstaunen versetzen.","Mark Twain"],["Nicht alles wächst sichtbar.",null],["Wie wunderbar ist es, dass niemand eine Minute warten muss, um die Welt zu verändern.","Anne Frank"],["Die Welt ist voller Wunder, wenn man hinsieht.",null],["Nicht die Größe des Hundes entscheidet den Kampf, sondern die Größe des Kampfes im Hund.","Mark Twain"],["Ein Regentag ist nur ein Sonnentag mit anderer Beleuchtung.",null],["Wer glücklich ist, macht auch andere glücklich.","Anne Frank"],["Wer Wurzeln hat, kann auch Flügel bekommen.",null],["Früher konnte ich mich an alles erinnern, ob es geschehen war oder nicht. Aber ich werde alt.","Mark Twain"],["Die Zeit vergeht, aber schöne Erinnerungen bleiben.",null],["Trotz allem glaube ich an das Gute im Menschen.","Anne Frank"],["Wissen ist gut, Verstehen ist besser.",null],["Lasst uns so leben, dass am Ende sogar der Bestatter traurig ist.","Mark Twain"],["Wer Fragen stellt, hat schon angefangen zu lernen.",null],["Ein Tag ohne Lächeln ist ein verlorener Tag.","Charlie Chaplin"],["Ein kluger Mensch kann seine Meinung ändern.",null],["Die Liebe scheint am schnellsten zu wachsen – tatsächlich wächst sie am langsamsten von allen Dingen.","Mark Twain"],["Bildung beginnt mit Neugier.",null],["Niemand kann dich dich klein fühlen lassen, ohne dass du es erlaubst.","Eleanor Roosevelt"],["Wer alles glaubt, muss sich nicht wundern.",null],["Blumenkohl ist nichts anderes als Kohl mit Universitätsbildung.","Mark Twain"],["Nicht jede Wahrheit ist angenehm, aber jede Lüge hat ihren Preis.",null],["Tu jeden Tag eine Sache, die dich fürchtet.","Eleanor Roosevelt"],["Denken ist Arbeit, Nachdenken ist Kunst.",null],["Um den vollen Wert einer Freude zu bekommen, braucht es jemanden, mit dem man sie teilt.","Mark Twain"],["Wer seinen Verstand benutzt, braucht keine fremden Meinungen als Krücke.",null],["Tausende Kerzen können an einer einzigen entzündet werden, ohne dass ihr Licht schwindet – Glück nimmt nicht ab, wenn man es teilt.","Buddha (zugeschrieben)"],["Man lernt nie aus, solange man neugierig bleibt.",null],["Das Leben wäre unendlich glücklicher, könnten wir mit achtzig geboren werden und allmählich achtzehn erreichen.","Mark Twain"],["Ein offener Geist findet mehr Türen als ein voller Kopf.",null],["Sei du selbst – alle anderen gibt es schon.","Oscar Wilde"],["Zweifel sind der Anfang mancher Erkenntnis.",null],["Gute Freunde, gute Bücher und ein schläfriges Gewissen – das ist das ideale Leben.","Mark Twain"],["Wer Zusammenhänge erkennt, sieht mehr als Einzelheiten.",null],["Ich kann allem widerstehen – außer der Versuchung.","Oscar Wilde"],["Die beste Antwort ist manchmal eine gute Frage.",null],["Nehmen wir an, du wärst ein Idiot – und nehmen wir an, du wärst Abgeordneter. Ich wiederhole mich.","Mark Twain"],["Unwissenheit ist kein Makel, solange man lernbereit bleibt.",null],["Ein kluger Mann widerspricht seiner Frau nicht – er wartet, bis sie es selbst tut.","Theodor Fontane"],["Wer das Leben ernst nimmt, sollte den Humor nicht vergessen.",null],["Es gibt nur ein Glück im Leben: zu lieben und geliebt zu werden.","George Sand"],["Ein freier Kopf braucht keine goldenen Käfige.",null],["Die Liebe ist die einzige gesunde und befriedigende Antwort auf das Problem menschlicher Existenz.","Erich Fromm"],["Manchmal ist der gesunde Menschenverstand die seltenste Gabe.",null],["Jeder denkt daran, die Welt zu verändern – aber keiner daran, sich selbst zu verändern.","Leo Tolstoi"],["Wer Licht verbreitet, muss nicht im Mittelpunkt stehen.",null],["Wenn du etwas von Herzen willst, dann arbeitet das ganze Universum darauf hin, dass du es erreichst.","Paulo Coelho"],["Die Wahrheit braucht keine Dekoration.",null],["Halte dein Gesicht der Sonne zugewandt – dann siehst du keinen Schatten.","Helen Keller"],["Jeder Mensch ist ein Kapitel, nicht das ganze Buch.",null],["Das Leben ist entweder ein kühnes Abenteuer – oder gar nichts.","Helen Keller"],["Wer sich selbst findet, muss sich nicht ständig beweisen.",null],["Wer ein Warum zu leben hat, erträgt fast jedes Wie.","Friedrich Nietzsche"],["Am Ende zählt nicht, was wir besessen, sondern was wir erlebt haben.",null],["Man muss noch Chaos in sich haben, um einen tanzenden Stern gebären zu können.","Friedrich Nietzsche"],["Ohne Musik wäre das Leben ein Irrtum.","Friedrich Nietzsche"],["Der Mensch kann tun, was er will – er kann aber nicht wollen, was er will.","Arthur Schopenhauer"],["Zwei Dinge erfüllen das Gemüt mit stets neuer Bewunderung: der bestirnte Himmel über mir und das moralische Gesetz in mir.","Immanuel Kant"],["Wer kämpft, kann verlieren – wer nicht kämpft, hat schon verloren.","Bertolt Brecht (zugeschrieben)"],["Sei du selbst die Veränderung, die du dir für die Welt wünschst.","Mahatma Gandhi (zugeschrieben)"],["Ich will dem Schicksal in den Rachen greifen – ganz niederbeugen soll es mich gewiss nicht.","Ludwig van Beethoven"],["Keine einzige zu viel, Majestät!","Wolfgang Amadeus Mozart"],["Ein Zimmer ohne Bücher ist wie ein Körper ohne Seele.","Cicero (zugeschrieben)"],["Das Leben wird rückwärts verstanden – aber vorwärts gelebt.","Søren Kierkegaard"],["Von guten Mächten wunderbar geborgen – erwarten wir getrost, was kommen mag.","Dietrich Bonhoeffer"],["Das Leben ist das, was passiert, während du dabei bist, große Pläne zu machen.","John Lennon (zugeschrieben)"],["Zeit, die man gerne vergeudet, ist nicht verschwendete Zeit.","John Lennon (zugeschrieben)"],["Liebe das Leben, das du lebst – und lebe das Leben, das du liebst.","Bob Marley"],["Mögest du für immer jung bleiben.","Bob Dylan"],["In allem gibt es einen Riss – genau dadurch kommt das Licht hinein.","Leonard Cohen"],["Halte dir ein Herz, das nie hart wird, ein Gemüt, das nie müde wird, und eine Berührung, die nie wehtut.","Charles Dickens"],["Nichts bezaubert so sehr wie Zartheit des Herzens.","Jane Austen"],["Die Hoffnung ist das Ding mit Federn, das in der Seele singt.","Emily Dickinson"],["Das Herz hat seine Gründe, die die Vernunft nicht kennt.","Blaise Pascal"],["Heute ist die gute alte Zeit von morgen.","Karl Valentin"],["Kunst kommt von Können – wäre sie von Wollen, hieße sie Wunst.","Karl Valentin"],["Es ist der Geist, der sich den Körper baut.","Friedrich Schiller"],["Die Welt muss romantisiert werden.","Novalis"],["Wo aber Gefahr ist, wächst das Rettende auch.","Friedrich Hölderlin"],["Es ist unmöglich, die Fackel der Wahrheit durch eine Menge leuchten zu lassen, ohne jemandem den Bart zu versengen.","Georg Christoph Lichtenberg"],["Die ganze Welt ist eine Bühne – und alle Männer und Frauen bloße Spieler.","William Shakespeare"],["Die Schönheit wird die Welt retten.","Fjodor Dostojewski"],["Das Leben ist das schönste Märchen.","Hans Christian Andersen"],["Alles, was der Mensch sich vorstellen kann, können andere Menschen verwirklichen.","Jules Verne (zugeschrieben)"],["Wenn der Schüler bereit ist, erscheint der Lehrer.","Zen-Sprichwort"],["Fallen siebenmal, aufstehen achtmal.","Japanisches Sprichwort"],["Der beste Zeitpunkt, einen Baum zu pflanzen, war vor zwanzig Jahren – der nächstbeste ist heute.","Chinesisches Sprichwort"],["Viele kleine Leute an vielen kleinen Orten, die viele kleine Schritte tun, können das Gesicht der Welt verändern.","Afrikanisches Sprichwort"],["Am Mut hängt der Erfolg.","Theodor Fontane"],["Der Mensch ist ein Gott, wenn er träumt – ein Bettler, wenn er denkt.","Friedrich Hölderlin"],["Der Mensch ist frei geschaffen, ist frei – und wär' er in Ketten geboren.","Friedrich Schiller"],["Wer nicht mehr liebt und nicht mehr irrt, der lasse sich begraben.","Gotthold Ephraim Lessing"],["Schläft ein Lied in allen Dingen, die da träumen fort und fort – und die Welt hebt an zu singen, triffst du nur das Zauberwort.","Joseph von Eichendorff"],["Es ist nie zu spät, das zu werden, was man hätte sein können.","George Eliot"],["Mode vergeht – Stil bleibt.","Coco Chanel"],["Nichts ist unmöglich – das Wort selbst sagt ja ‚möglich’.","Audrey Hepburn (zugeschrieben)"],["Lachen ist die beste Medizin.","Volksweisheit"],["Was man tief in seinem Herzen besitzt, kann man nicht durch den Tod verlieren.","J. W. von Goethe"],["Was du heute kannst besorgen, das verschiebe nicht auf morgen.","Sprichwort"],["Geteilte Freude ist doppelte Freude, geteiltes Leid ist halbes Leid.","Sprichwort"],["Wer sucht, der findet.","Sprichwort"],["Der Weg ist das Ziel.","Sprichwort"],["Man ist so alt, wie man sich fühlt.","Volksweisheit"],["Was Hänschen nicht lernt, lernt Hans nimmermehr.","Sprichwort"],["Der Ton macht die Musik.","Sprichwort"],["Hochmut kommt vor dem Fall.","Sprichwort"],["Lügen haben kurze Beine.","Sprichwort"],["Reden ist Silber, Schweigen ist Gold.","Sprichwort"],["Wie du in den Wald hineinrufst, so schallt es heraus.","Sprichwort"],["Von nichts kommt nichts.","Sprichwort"],["Erst wägen, dann wagen.","Sprichwort"],["Besser spät als nie.","Sprichwort"],["Ende gut, alles gut.","Sprichwort"],["Wer einmal lügt, dem glaubt man nicht – und wenn er auch die Wahrheit spricht.","Sprichwort"],["Früh übt sich, was ein Meister werden will.","Sprichwort"],["Ohne Fleiß kein Preis.","Sprichwort"],["Aus Kindern werden Leute.","Sprichwort"],["Jedermann ist der Architekt seines eigenen Glücks.","Sprichwort"],["Wo ein Wille ist, da ist auch ein Weg.","Sprichwort"],["Kleine Geschenke erhalten die Freundschaft.","Sprichwort"],["Neugier ist der Anfang allen Wissens.","Volksweisheit"],["Ein Lächeln kostet nichts, gibt aber viel.","Volksweisheit"],["Morgenstund hat Gold im Mund.","Sprichwort"],["Eile mit Weile.","Sprichwort"],["Wer rastet, der rostet.","Sprichwort"],["Stille Wasser sind tief.","Sprichwort"],["Gut Ding will Weile haben.","Sprichwort"],["Aller Anfang ist schwer.","Sprichwort"],["Wer zuletzt lacht, lacht am besten.","Sprichwort"],["Man schmiede das Eisen, solange es heiß ist.","Sprichwort"],["Auch ein blindes Huhn findet manchmal ein Korn.","Sprichwort"],["Übung macht den Meister.","Sprichwort"],["Der Apfel fällt nicht weit vom Stamm.","Sprichwort"],["Alles hat seine Zeit.","Sprichwort"],["Was sich liebt, das neckt sich.","Sprichwort"],["Ein Freund ist ein zweites Ich.","Aristoteles"],["Ein Anfang ist die Hälfte des Ganzen.","Aristoteles (zugeschrieben)"],["Die Freundschaft verdoppelt die Freuden und halbiert die Sorgen.","Sprichwort"],["Das Leben ist lang, wenn man es zu nutzen weiß.","Seneca"],["Die Welt ist ein Buch, und wer nicht reist, liest nur eine Seite.","Augustinus (zugeschrieben)"],["Wo man singt, da lass dich ruhig nieder; böse Menschen singen keine Lieder.","Johann Gottfried Seume"],["Gut gebrüllt, Löwe!","William Shakespeare"],["Dem Glücklichen schlägt keine Stunde.","Sprichwort"],["Der Krug geht so lange zum Brunnen, bis er bricht.","Sprichwort"],["Jedem Tierchen sein Plaisierchen.","Sprichwort"],["Gefahr erkannt, Gefahr gebannt.","Katharina Schütz"]];
+const BIRTHDAYS = [
+  { d: 8, m: 1, y: 1956, name: 'Volker Karl-Heinz Rath' },
+  { d: 31, m: 1, y: 1978, name: 'Peer Rath' },
+  { d: 5, m: 2, y: 1931, name: 'Friedel Annemarie Rath' },
+  { d: 12, m: 2, y: 1978, name: 'Stefanie Rath' },
+  { d: 15, m: 2, y: 1955, name: 'Marianne Rath' },
+  { d: 18, m: 2, y: 2017, name: 'Eleanor Elva Andrea Zimmermann' },
+  { d: 2, m: 3, y: 2015, name: 'Nelly Katharina Schütz' },
+  { d: 15, m: 3, y: 1931, name: 'Annemarie Buhl' },
+  { d: 29, m: 3, y: 1961, name: 'Karin Buhl' },
+  { d: 23, m: 4, y: 2012, name: 'Skadi Martina Schütz' },
+  { d: 4, m: 5, y: 1955, name: 'Martina Reimer' },
+  { d: 19, m: 5, y: 1987, name: 'Nathalie Maria Katharina Schütz-Zimmermann' },
+  { d: 25, m: 5, y: 2020, name: 'Alaistair Meinhard Zimmermann' },
+  { d: 5, m: 6, y: 1995, name: 'Lisa Julanta Rath' },
+  { d: 17, m: 6, y: 1983, name: 'Marco Thomas Schütz' },
+  { d: 26, m: 6, y: 1974, name: 'Steffen Rath' },
+  { d: 2, m: 7, y: 1984, name: 'Robin Rath' },
+  { d: 25, m: 7, y: 1974, name: 'Michael Rath' },
+  { d: 29, m: 7, y: 1960, name: 'Katharina Schütz' },
+  { d: 13, m: 8, y: 1984, name: 'Steven Zimmermann' },
+  { d: 16, m: 8, y: 1934, name: 'Anita Edith Hertha' },
+  { d: 18, m: 8, y: 1967, name: 'Sarina Anita Rath' },
+  { d: 19, m: 8, y: 1981, name: 'Linda Rath' },
+  { d: 24, m: 8, y: 1963, name: 'Simone Carmen Rath' },
+  { d: 2, m: 9, y: 1939, name: 'Jürgen Tabbert' },
+  { d: 17, m: 9, y: 1957, name: 'Martina Rath' },
+  { d: 17, m: 9, y: 1960, name: 'Andrea Zimmermann' },
+  { d: 5, m: 10, y: 1929, name: 'Kurt Werner Schütz' },
+  { d: 8, m: 10, y: 1934, name: 'Annemarie Olga Schütz' },
+  { d: 1, m: 11, y: 2019, name: 'Saana Rath' },
+  { d: 10, m: 11, y: 1981, name: 'Ulrike Schütz' },
+  { d: 17, m: 11, y: 1955, name: 'Viola Rath' },
+  { d: 19, m: 11, y: 1944, name: 'Hannes Hertha' },
+  { d: 22, m: 11, y: 1952, name: 'Wolfgang Reimer' },
+  { d: 3, m: 12, y: 2019, name: 'Cecilia Rath' },
+  { d: 11, m: 12, y: 1958, name: 'Thomas Karl-Wilhelm Rath' },
+  { d: 21, m: 12, y: 1969, name: 'Ingmar Wist' }
+];
+// Gedenktage: t='tod' = Todestag · t='geb' = Geburtstag einer verstorbenen Person
+const GEDENKE = [
+  { d: 5, m: 2, t: 'tod', name: 'Hedwig Johanna Frieda Rath' },
+  { d: 28, m: 2, y: 1912, t: 'geb', name: 'Hedwig Johanna Frieda Rath' },
+  { d: 15, m: 4, y: 1912, t: 'geb', name: 'Marie-Sophie Tabbert' },
+  { d: 8, m: 4, t: 'tod', name: 'Andreas Jörg Schütz' },
+  { d: 16, m: 6, y: 1960, t: 'geb', name: 'Andreas Jörg Schütz' },
+  { d: 25, m: 6, t: 'tod', name: 'Karl-Heinz Erich Friedrich Rath' },
+  { d: 30, m: 7, t: 'tod', name: 'Michael Schütz' },
+  { d: 23, m: 9, y: 1904, t: 'geb', name: 'Karl Martin Heinrich Friedrich Rath' },
+  { d: 4, m: 10, y: 1932, t: 'geb', name: 'Karl-Heinz Erich Friedrich Rath' },
+  { d: 21, m: 12, y: 1955, t: 'geb', name: 'Michael Schütz' }
+];
+const BIRTH = new Date(1987, 4, 19);
+const START = new Date(2027, 0, 1);
+const WDS = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+const WDFULL = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
+const MONTHS = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+const ORD = { 1: 'erste', 2: 'zweite', 3: 'dritte', 4: 'vierte', 5: 'fünfte', 6: 'sechste', 7: 'siebte', 8: 'achte', 9: 'neunte', 10: 'zehnte', 11: 'elfte', 12: 'zwölfte', 13: 'dreizehnte', 14: 'vierzehnte', 15: 'fünfzehnte', 16: 'sechzehnte', 17: 'siebzehnte', 18: 'achtzehnte', 19: 'neunzehnte', 20: 'zwanzigste', 21: 'einundzwanzigste', 22: 'zweiundzwanzigste', 23: 'dreiundzwanzigste', 24: 'vierundzwanzigste', 25: 'fünfundzwanzigste', 26: 'sechsundzwanzigste', 27: 'siebenundzwanzigste', 28: 'achtundzwanzigste', 29: 'neunundzwanzigste', 30: 'dreißigste', 31: 'einunddreißigste' };
+const cards = QUOTES.map((q, i) => {
+  const d = new Date(START); d.setDate(d.getDate() + i);
+  return { d, q: q[0], a: q[1], ep: 14473 + i };
+});
+let index = 0;
+let reading = false;
+function eventsFor(i) {
+  const c = cards[i];
+  const dd = c.d.getDate(), mm = c.d.getMonth() + 1, yy = c.d.getFullYear();
+  const ev = [];
+  BIRTHDAYS.forEach(b => { if (b.d === dd && b.m === mm) ev.push({
+    text: '🎂 ' + b.name + ' wird ' + (yy - b.y),
+    speech: ' Heute hat ' + b.name + ' Geburtstag und wird ' + (yy - b.y) + ' Jahre alt.'
+  }); });
+  GEDENKE.forEach(g => { if (g.d === dd && g.m === mm) ev.push(g.t === 'tod' ? {
+    text: '🕯️ In Gedenken: ' + g.name,
+    speech: ' Heute gedenken wir ' + g.name + '.'
+  } : {
+    text: '🕯️ ' + g.name + ' · würde ' + (yy - g.y),
+    speech: ' Heute wäre ' + g.name + ' ' + (yy - g.y) + ' Jahre alt geworden.'
+  }); });
+  return ev;
+}
+function fmt(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
+function dateStr(d) { return WDS[d.getDay()] + ' · ' + String(d.getDate()).padStart(2, '0') + '.' + String(d.getMonth() + 1).padStart(2, '0') + '.' + d.getFullYear(); }
+const nb = t => t.replace(/(\d{1,2}\.)\s+(Januar|Februar|März|April|Mai|Juni|Juli|August|September|Oktober|November|Dezember)/g, '$1\u00A0$2');
+function render() {
+  const c = cards[index];
+  document.getElementById('counter').textContent = 'TAG ' + String(index + 1).padStart(2, '0') + ' VON ' + cards.length + '  ·  EPISODE ' + fmt(c.ep);
+  document.getElementById('rubric').textContent = MONTHS[c.d.getMonth()] + ' · ' + String(c.d.getDate()).padStart(2, '0') + '.' + String(c.d.getMonth() + 1).padStart(2, '0') + '.' + c.d.getFullYear();
+  document.getElementById('epLabel').textContent = 'Episode ' + fmt(c.ep);
+  document.getElementById('enText').textContent = dateStr(c.d);
+  document.getElementById('deText').textContent = nb(c.q + (c.a ? '  –  ' + c.a : ''));
+  const ev = eventsFor(index);
+  const badge = document.getElementById('bdBadge');
+  if (ev.length) { badge.innerHTML = ev.map(e => e.text).join('<br>'); badge.classList.add('show'); }
+  else badge.classList.remove('show');
+}
+function numWords(n) {
+  const ones = ['','ein','zwei','drei','vier','fünf','sechs','sieben','acht','neun','zehn','elf','zwölf','dreizehn','vierzehn','fünfzehn','sechzehn','siebzehn','achtzehn','neunzehn'];
+  const tens = ['','','zwanzig','dreißig','vierzig','fünfzig','sechzig','siebzig','achtzig','neunzig'];
+  const u100 = x => x < 20 ? ones[x] : (x % 10 ? ones[x % 10] + 'und' + tens[Math.floor(x / 10)] : tens[Math.floor(x / 10)]);
+  const u1000 = x => (x >= 100 ? ones[Math.floor(x / 100)] + 'hundert' : '') + (x % 100 ? u100(x % 100) : '');
+  if (n < 1000) return u1000(n);
+  const t = Math.floor(n / 1000), r = n % 1000;
+  return (t === 1 ? 'ein' : u1000(t)) + 'tausend' + (r ? u1000(r) : '');
+}
+function pickVoice() {
+  const voices = window.speechSynthesis.getVoices();
+  return voices.find(v => v.lang && (v.lang.toLowerCase().startsWith('de-de') || v.lang.toLowerCase().startsWith('de')));
+}
+function speechText() {
+  const c = cards[index];
+  let s = WDFULL[c.d.getDay()] + ', der ' + ORD[c.d.getDate()] + ' ' + MONTHS[c.d.getMonth()] + ' ' + numWords(2027) + '. Episode ' + numWords(c.ep) + '.';
+  eventsFor(index).forEach(e => { s += e.speech; });
+  return s;
+}
+function setReading(b) {
+  reading = b;
+  const btn = document.getElementById('speakBtn');
+  btn.textContent = b ? '⏹ Stopp' : '🔊 Vorlesen';
+  btn.classList.toggle('active', b);
+  btn.setAttribute('aria-pressed', b ? 'true' : 'false');
+}
+function speakCurrent() {
+  if (!reading || !('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(speechText());
+  u.lang = 'de-DE';
+  u.rate = 0.85;
+  u.pitch = 1;
+  const voice = pickVoice();
+  if (voice) u.voice = voice;
+  u.onerror = () => {
+    if (!reading) return;
+    setTimeout(() => { if (reading) { try { window.speechSynthesis.speak(u); } catch (e) {} } }, 150);
+  };
+  window.speechSynthesis.speak(u);
+  setTimeout(() => {
+    if (reading && !window.speechSynthesis.speaking && !window.speechSynthesis.pending) {
+      try { window.speechSynthesis.speak(u); } catch (e) {}
+    }
+  }, 250);
+}
+function stopReading() {
+  setReading(false);
+  if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+}
+if ('speechSynthesis' in window) {
+  window.speechSynthesis.getVoices();
+  window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+}
+document.getElementById('speakBtn').addEventListener('click', () => {
+  if (reading) { stopReading(); }
+  else { setReading(true); speakCurrent(); }
+});
+function go(step) {
+  index = (index + step + cards.length) % cards.length;
+  render();
+  if (reading) speakCurrent();
+}
+document.getElementById('nextBtn').addEventListener('click', () => go(1));
+document.getElementById('prevBtn').addEventListener('click', () => go(-1));
+document.getElementById('studyCard').addEventListener('click', () => go(1));
+function openDlg(id) { document.getElementById(id).classList.add('open'); }
+function closeDlg(id) { document.getElementById(id).classList.remove('open'); }
+function toggleStudio() {
+  const panel = document.getElementById('studioPanel');
+  const card = document.getElementById('foldcard');
+  panel.classList.toggle('open');
+  const open = panel.classList.contains('open');
+  card.style.animationPlayState = open ? 'paused' : 'running';
+  if (open) card.style.transform = 'rotateY(0deg)';
+}
+document.getElementById('studioPanel').addEventListener('click', () => toggleStudio());
+document.getElementById('studioToggle').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleStudio(); } });
+document.getElementById('startBtn').addEventListener('click', e => { e.stopPropagation(); document.getElementById('startPage').classList.add('gone'); });
+document.getElementById('startTopBtn').addEventListener('click', e => { e.stopPropagation(); index = 0; render(); document.getElementById('startPage').classList.add('gone'); });
+document.getElementById('titleBtn').addEventListener('click', () => { stopReading(); document.getElementById('startPage').classList.remove('gone'); });
+document.getElementById('startPage').addEventListener('click', () => document.getElementById('startPage').classList.add('gone'));
+(function initStart() {
+  const today = new Date();
+  const days = Math.floor((today - BIRTH) / 864e5) + 1;
+  document.getElementById('startEp').textContent = 'Heute: Episode ' + fmt(days) + ' deines Lebens';
+})();
+(function makePrintSheets() {
+  const area = document.getElementById('printArea');
+  // Deckblatt als kleine Karte (Karte 1 von 366)
+  const items = [{ cover: true }].concat(cards.map((c, i) => ({ c: c, i: i })));
+  const PER_SHEET = 30;
+  const totalSheets = Math.ceil(items.length / PER_SHEET);
+  for (let s = 0; s < totalSheets; s++) {
+    const sheet = document.createElement('div');
+    sheet.style.position = 'relative';
+    sheet.className = 'sheet';
+    const head = document.createElement('div');
+    head.className = 'print-heading';
+    head.innerHTML = '<span>Nathalies HTB · 2027 · Jahresband · ♉</span><span>' + (s + 1) + ' / ' + totalSheets + '</span>';
+    area.appendChild(head);
+    items.slice(s * PER_SHEET, (s + 1) * PER_SHEET).forEach(item => {
+      const chip = document.createElement('div');
+      if (item.cover) {
+        chip.className = 'chip cv';
+        chip.innerHTML =
+          '<div class="c-glue"></div>' +
+          '<div class="cv-label2">NATHALIES<br>HOSENTASCHENBUCH</div>' +
+          '<div class="cv-year2">2027</div>' +
+          '<div class="cv-lion2">♉</div>' +
+          '<div class="cv-name2">Nathalie</div>' +
+          '<div class="cv-orn2">✦ ─── ✦ ─── ✦</div>' +
+          '<div class="cv-sub2">Jahresband · 365 Tage<br>des Jahres 2027</div>';
+      } else {
+        const c = item.c;
+        const ev = eventsFor(item.i);
+        const len = c.q.length + (c.a ? c.a.length : 0);
+        chip.className = 'chip' + (len > 130 ? ' xl' : len > 95 ? ' lg' : '');
+        chip.innerHTML =
+          '<div class="c-glue"></div>' +
+          '<div class="c-top"><span class="c-label">Episode ' + fmt(c.ep) + '</span><span class="c-rub">' + dateStr(c.d) + '</span></div>' +
+          '<div class="eng">' + nb(c.q) + '</div>' +
+          '<div class="rule"></div>' +
+          (c.a ? '<div class="de">' + c.a + '</div>' : '') +
+          (ev.length ? '<div class="c-bd">' + ev.map(e => e.text).join('<br>') + '</div>' : '');
+      }
+      sheet.appendChild(chip);
+    });
+    if (s === totalSheets - 1 && items.length % PER_SHEET) {
+      const ye = document.createElement('div');
+      ye.className = 'year-end';
+      ye.innerHTML = '✦ &nbsp;Jahresende 2027 &nbsp;✦<br>365 Episoden deines Lebens';
+      sheet.appendChild(ye);
+    }
+    const foot = document.createElement('div');
+    foot.className = 'sheet-footer';
+    foot.textContent = 'ARC(E)ANA creative studio';
+    sheet.appendChild(foot);
+    area.appendChild(sheet);
+  }
+})();
+document.getElementById('printBtn').addEventListener('click', () => window.print());
+render();
+</script>
+</body>
+</html>
