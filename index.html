@@ -50,6 +50,21 @@ footer a { color: var(--muted); text-decoration: underline; cursor: pointer; }
 .overlay { display: none; position: fixed; inset: 0; background: rgba(27,42,74,.55); z-index: 50; padding: 20px; overflow-y: auto; }
 .overlay.open { display: flex; align-items: center; justify-content: center; }
 .dlg { background: #fff; border-radius: 18px; padding: 22px; max-width: 400px; width: 100%; box-shadow: 0 20px 50px rgba(0,0,0,.3); max-height: 86vh; overflow-y: auto; }
+.cal-btn { position: absolute; top: 10px; left: 12px; width: 36px; height: 36px; border-radius: 10px; border: 1.5px solid var(--gold); background: var(--blue2); color: #fff; font-size: 18px; line-height: 1; cursor: pointer; box-shadow: 0 3px 10px rgba(27,42,74,.3); z-index: 5; }
+.cal-btn:hover { background: var(--gold); color: #1b2a4a; }
+.dlg.cal { max-width: 760px; }
+.cal-hint { font-size: .72rem; color: #667; margin: 0 0 12px; }
+.cal-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+@media (max-width: 680px) { .cal-grid { grid-template-columns: repeat(2, 1fr); } }
+.cal-m h4 { text-align: center; font-size: .74rem; letter-spacing: .08em; text-transform: uppercase; color: #1b2a4a; margin: 0 0 6px; }
+.cal-w { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; margin-bottom: 2px; }
+.cal-w span { font-size: .54rem; font-weight: 700; color: #99a; text-align: center; }
+.cal-d { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+.cal-d .blank { visibility: hidden; }
+.cal-d button { aspect-ratio: 1; border: 0; border-radius: 6px; background: #eef1fa; color: #1b2a4a; font-size: .64rem; font-weight: 500; font-family: inherit; cursor: pointer; position: relative; padding: 0; }
+.cal-d button.sun { color: #b04040; background: #f9eff0; }
+.cal-d button.ev::after { content: '✦'; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); font-size: .4rem; color: var(--gold); }
+.cal-d button:hover { background: var(--gold); color: #1b2a4a; }
 .dlg h3 { margin: 0 0 10px; color: var(--blue2); }
 .dlg p { font-size: .85rem; line-height: 1.45; margin: 0 0 10px; }
 .dlg button { margin-top: 6px; border: 0; border-radius: 12px; padding: 10px 20px; font-weight: 700; background: var(--blue2); color: #fff; }
@@ -80,32 +95,32 @@ footer a { color: var(--muted); text-decoration: underline; cursor: pointer; }
   .start { display: none !important; }
   .print-only { display: block !important; width: 194mm !important; max-width: 194mm !important; margin: 0 !important; }
   .print-heading { display: flex; align-items: center; justify-content: space-between; font-size: 9pt; color: #555; font-weight: 700; padding: 0 0 2mm; width: 192mm; margin: 0; }
-  .sheet { display: grid; grid-template-columns: repeat(5, 36mm); grid-auto-rows: 42mm; gap: 2.4mm 2.6mm; padding: 0 0 4mm; width: 192mm; margin: 0; page-break-after: always; position: relative; box-sizing: content-box; }
+  .sheet { display: grid; grid-template-columns: repeat(5, 36mm); grid-auto-rows: 66mm; gap: 1.8mm 2.6mm; padding: 0 0 3mm; width: 192mm; margin: 0; page-break-after: always; position: relative; box-sizing: content-box; }
   .sheet:last-child { page-break-after: auto; }
-  .chip { border: 0.35mm dashed #999; padding: 1mm 1.4mm 1.4mm; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; overflow: hidden; break-inside: avoid; }  /* gestrichelte Linie = Schneidelinie */
+  .chip { border: 0.35mm dashed #999; padding: 1.5mm 2mm 2mm; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; overflow: hidden; break-inside: avoid; }  /* gestrichelte Linie = Schneidelinie, Karte 36 x 66 mm */
   .c-glue { width: 100%; border-bottom: 0.25mm dotted #ccc; margin-bottom: 1.1mm; flex: none; }  /* Klebefläche oben */
-  .chip .c-top { display: block; width: 100%; margin-bottom: 1.2mm; }  /* Episode-Zeile, darunter Datum */
-  .chip .c-label { display: block; font-size: 5pt; font-weight: 700; letter-spacing: .04em; color: #2a52be; }
-  .chip .c-rub { display: block; font-size: 5.2pt; font-weight: 400; letter-spacing: .04em; color: #666; margin-top: 0.3mm; }
-  .chip .eng { font-size: 7.6pt; font-weight: 400; color: #1b2a4a; line-height: 1.12; overflow-wrap: break-word; }
+  .chip .c-top { display: block; width: 100%; margin-bottom: 2mm; }  /* Episode-Zeile, darunter Datum */
+  .chip .c-label { display: block; font-size: 6pt; font-weight: 700; letter-spacing: .04em; color: #2a52be; }
+  .chip .c-rub { display: block; font-size: 6.2pt; font-weight: 400; letter-spacing: .04em; color: #666; margin-top: 0.3mm; }
+  .chip .eng { font-size: 9.4pt; font-weight: 400; color: #1b2a4a; line-height: 1.12; overflow-wrap: break-word; }
   .chip .eng::first-line { font-weight: 800; }  /* nur die erste Zeile fett */
-  .chip .rule { width: 8mm; height: 0.4mm; background: #bbb; margin: 1.8mm 0; }
-  .chip .de { font-size: 6.2pt; font-weight: 400; color: #333; line-height: 1.12; overflow-wrap: break-word; }
-  .chip .c-auth { font-size: 6pt; font-weight: 400; color: #777; margin-top: 1mm; }
-  .chip .c-bd { font-size: 5.4pt; font-weight: 700; color: #2a52be; margin-top: 0.8mm; line-height: 1.25; }
-  .year-end { grid-column: 1 / -1; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 12pt; font-weight: 700; color: #1b2a4a; border: 0.4mm dashed #e7c26a; border-radius: 4mm; margin-top: 2mm; }
-  .chip.lg .de { font-size: 5.8pt; }
-  .chip.xl .de { font-size: 5.2pt; }
-  .chip.lg .eng { font-size: 6.9pt; } .chip.xl .eng { font-size: 6pt; }
+  .chip .rule { width: 10mm; height: 0.5mm; background: #bbb; margin: 2.6mm 0; }
+  .chip .de { font-size: 7.6pt; font-weight: 400; color: #333; line-height: 1.12; overflow-wrap: break-word; }
+  .chip .c-auth { font-size: 7.2pt; font-weight: 400; color: #777; margin-top: 1mm; }
+  .chip .c-bd { font-size: 6.6pt; font-weight: 700; color: #2a52be; margin-top: 0.8mm; line-height: 1.25; }
+  .year-end { grid-column: 2 / -1; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 13pt; font-weight: 700; color: #1b2a4a; border: 0.4mm dashed #e7c26a; border-radius: 4mm; margin-top: 2mm; }
+  .chip.lg .de { font-size: 7pt; }
+  .chip.xl .de { font-size: 6.4pt; }
+  .chip.lg .eng { font-size: 8.4pt; } .chip.xl .eng { font-size: 7.4pt; }
   .sheet-footer { position: absolute; bottom: 0.5mm; left: 0; width: 100%; text-align: center; font-size: 6pt; color: #aaa; }  /* im unteren Randbereich, ohne Kartenreihe */
   .chip.cv { background: linear-gradient(160deg, #101c36 0%, #1b2a4a 45%, #2a52be 100%); border: 0.35mm dashed #999; }  /* Deckblatt als kleine Karte */
   .chip.cv .c-glue { border-bottom: 0.25mm dotted rgba(231,194,106,.6); }
-  .cv-label2 { font-size: 3.6pt; font-weight: 700; letter-spacing: .18em; color: #dbe6ff; line-height: 1.5; }
-  .cv-year2 { font-size: 15pt; font-weight: 800; line-height: 1; color: #fff; }
-  .cv-lion2 { font-size: 16pt; line-height: 1.15; }
-  .cv-name2 { font-family: Georgia, 'Times New Roman', serif; font-style: italic; font-size: 7.5pt; color: #e7c26a; }
-  .cv-orn2 { font-size: 3.4pt; letter-spacing: .1em; color: #e7c26a; }
-  .cv-sub2 { font-size: 4.2pt; line-height: 1.5; color: #dbe6ff; }
+  .cv-label2 { font-size: 4.4pt; font-weight: 700; letter-spacing: .18em; color: #dbe6ff; line-height: 1.5; }
+  .cv-year2 { font-size: 19pt; font-weight: 800; line-height: 1; color: #fff; }
+  .cv-lion2 { font-size: 21pt; line-height: 1.15; }
+  .cv-name2 { font-family: Georgia, 'Times New Roman', serif; font-style: italic; font-size: 9.5pt; color: #e7c26a; }
+  .cv-orn2 { font-size: 4pt; letter-spacing: .1em; color: #e7c26a; }
+  .cv-sub2 { font-size: 5.2pt; line-height: 1.5; color: #dbe6ff; }
   .cv-inner { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 8mm; border: 1.2mm solid #e7c26a; margin: 10mm; padding: 8mm; }
   .cv-label { font-size: 11pt; font-weight: 700; letter-spacing: .5em; color: #dbe6ff; }
   .cv-year { font-size: 60pt; font-weight: 800; line-height: 1; color: #fff; }
@@ -141,6 +156,7 @@ footer a { color: var(--muted); text-decoration: underline; cursor: pointer; }
   </header>
   <div class="counter" id="counter">TAG 01 VON 365  ·  EPISODE 14.473</div>
   <section class="card" id="studyCard" aria-live="polite">
+    <button class="cal-btn" id="calBtn" type="button" title="Kalender öffnen – Tag wählen">📅</button>
     <div class="rubric" id="rubric">Januar 2027</div>
     <div class="en">
       <div class="label" id="epLabel">Episode 24.262</div>
@@ -207,6 +223,12 @@ footer a { color: var(--muted); text-decoration: underline; cursor: pointer; }
   <p><strong>7. Rechtsgrundlage und Informationspflicht</strong><br>Soweit durch die App selbst keine personenbezogenen Daten verarbeitet werden, entstehen aus ihrer eigenständigen Nutzung keine Datenverarbeitungsvorgänge, über die nach Art. 13 DSGVO zu informieren wäre. Für eine gegebenenfalls stattfindende Verarbeitung durch Websitebetreiber, Hostinganbieter, Browser oder Betriebssysteme gelten die jeweiligen datenschutzrechtlichen Verantwortlichkeiten.</p>
   <p><strong>8. Stand und Aktualität</strong><br>Diese Datenschutzhinweise beziehen sich auf die beschriebene technische Ausführung der App. Bei Änderungen der technischen Funktionen oder der eingesetzten Dienste werden sie entsprechend angepasst.</p>
   <button onclick="closeDlg('dlgDs')">Schließen</button>
+</div></div>
+<div class="overlay" id="dlgCal"><div class="dlg cal">
+  <h3>📅 Kalender 2027 – Tag wählen</h3>
+  <p class="cal-hint">Tippe auf ein Datum – das Buch springt direkt zu dieser Karte. ✦ = Tag mit Familien-Ereignis (🎂 oder 🕯️), Sonntage in Rot.</p>
+  <div class="cal-grid" id="calGrid"></div>
+  <button onclick="closeDlg('dlgCal')">Schließen</button>
 </div></div>
 <section class="print-only" id="printArea" aria-label="Druckvorlage"></section>
 <script>
@@ -373,6 +395,41 @@ function go(step) {
 document.getElementById('nextBtn').addEventListener('click', () => go(1));
 document.getElementById('prevBtn').addEventListener('click', () => go(-1));
 document.getElementById('studyCard').addEventListener('click', () => go(1));
+(function buildCal() {
+  const grid = document.getElementById('calGrid');
+  const MONTHS = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+  const WD = ['Mo','Di','Mi','Do','Fr','Sa','So'];
+  for (let m = 0; m < 12; m++) {
+    const box = document.createElement('div'); box.className = 'cal-m';
+    const h = document.createElement('h4'); h.textContent = MONTHS[m] + ' 2027'; box.appendChild(h);
+    const w = document.createElement('div'); w.className = 'cal-w';
+    WD.forEach(d => { const s = document.createElement('span'); s.textContent = d; w.appendChild(s); });
+    box.appendChild(w);
+    const dg = document.createElement('div'); dg.className = 'cal-d';
+    const lead = (new Date(2027, m, 1).getDay() + 6) % 7;
+    for (let b = 0; b < lead; b++) { const bl = document.createElement('span'); bl.className = 'blank'; dg.appendChild(bl); }
+    const dim = new Date(2027, m + 1, 0).getDate();
+    for (let d = 1; d <= dim; d++) {
+      const idx = Math.round((new Date(2027, m, d) - START) / 864e5);
+      const b = document.createElement('button'); b.type = 'button';
+      b.textContent = d;
+      b.title = MONTHS[m] + ' ' + d + ', 2027';
+      if (new Date(2027, m, d).getDay() === 0) b.className = 'sun';
+      if (eventsFor(idx).length) { b.classList.add('ev'); b.title += ' – Familien-Ereignis'; }
+      b.addEventListener('click', e => {
+        e.stopPropagation();
+        index = idx; render();
+        closeDlg('dlgCal');
+        stopReading();
+        document.getElementById('startPage').classList.add('gone');
+      });
+      dg.appendChild(b);
+    }
+    box.appendChild(dg);
+    grid.appendChild(box);
+  }
+})();
+document.getElementById('calBtn').addEventListener('click', e => { e.stopPropagation(); stopReading(); openDlg('dlgCal'); });
 function openDlg(id) { document.getElementById(id).classList.add('open'); }
 function closeDlg(id) { document.getElementById(id).classList.remove('open'); }
 function toggleStudio() {
@@ -398,7 +455,7 @@ document.getElementById('startPage').addEventListener('click', () => document.ge
   const area = document.getElementById('printArea');
   // Deckblatt als kleine Karte (Karte 1 von 366)
   const items = [{ cover: true }].concat(cards.map((c, i) => ({ c: c, i: i })));
-  const PER_SHEET = 30;
+  const PER_SHEET = 20;
   const totalSheets = Math.ceil(items.length / PER_SHEET);
   for (let s = 0; s < totalSheets; s++) {
     const sheet = document.createElement('div');
