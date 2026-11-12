@@ -52,11 +52,20 @@ footer a { color: var(--muted); text-decoration: underline; cursor: pointer; }
 .dlg { background: #fff; border-radius: 18px; padding: 22px; max-width: 400px; width: 100%; box-shadow: 0 20px 50px rgba(0,0,0,.3); max-height: 86vh; overflow-y: auto; }
 .cal-btn { position: absolute; top: 10px; left: 12px; width: 36px; height: 36px; border-radius: 10px; border: 1.5px solid var(--gold); background: var(--blue2); color: #fff; font-size: 18px; line-height: 1; cursor: pointer; box-shadow: 0 3px 10px rgba(27,42,74,.3); z-index: 5; }
 .cal-btn:hover { background: var(--gold); color: #1b2a4a; }
-.dlg.cal { max-width: 760px; }
-.cal-hint { font-size: .72rem; color: #667; margin: 0 0 12px; }
-.cal-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
-@media (max-width: 680px) { .cal-grid { grid-template-columns: repeat(2, 1fr); } }
-.cal-m h4 { text-align: center; font-size: .74rem; letter-spacing: .08em; text-transform: uppercase; color: #1b2a4a; margin: 0 0 6px; }
+.dlg.cal { max-width: 760px; display: flex; flex-direction: column; padding: 14px 16px; }
+.dlg.cal h3 { margin: 0 0 4px; }
+.cal-hint { font-size: .72rem; color: #667; margin: 0 0 10px; flex: none; }
+.cal-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; overflow-y: auto; flex: 1 1 auto; min-height: 0; }
+.dlg.cal > button { flex: none; margin-top: 12px; }
+@media (max-width: 680px) {
+  .cal-grid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+  .cal-m h4 { font-size: .56rem; letter-spacing: .04em; margin: 0 0 2px; }
+  .cal-w span { font-size: .46rem; }
+  .cal-d { gap: 1px; }
+  .cal-d button { font-size: .54rem; }
+  .cal-d button.ev::after { font-size: .3rem; bottom: -1px; }
+}
+.cal-m h4 { text-align: center; font-size: .66rem; letter-spacing: .06em; text-transform: uppercase; color: #1b2a4a; margin: 0 0 4px; position: sticky; top: 0; background: #fff; padding: 2px 0; z-index: 2; }
 .cal-w { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; margin-bottom: 2px; }
 .cal-w span { font-size: .54rem; font-weight: 700; color: #99a; text-align: center; }
 .cal-d { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
@@ -94,8 +103,8 @@ footer a { color: var(--muted); text-decoration: underline; cursor: pointer; }
   .studio-panel { display: none !important; }
   .start { display: none !important; }
   .print-only { display: block !important; width: 194mm !important; max-width: 194mm !important; margin: 0 !important; }
-  .print-heading { display: flex; align-items: center; justify-content: space-between; font-size: 9pt; color: #555; font-weight: 700; padding: 0 0 2mm; width: 192mm; margin: 0; }
-  .sheet { display: grid; grid-template-columns: repeat(5, 36mm); grid-auto-rows: 66mm; gap: 1.8mm 2.6mm; padding: 0 0 3mm; width: 192mm; margin: 0; page-break-after: always; position: relative; box-sizing: content-box; }
+  .print-heading { display: flex; align-items: center; justify-content: space-between; font-size: 8pt; color: #555; font-weight: 700; padding: 0 0 1mm; width: 192mm; margin: 0; }
+  .sheet { display: grid; grid-template-columns: repeat(5, 36mm); grid-auto-rows: 66mm; gap: 1mm 2.6mm; padding: 0 0 2mm; width: 192mm; margin: 0; page-break-after: always; position: relative; box-sizing: content-box; }
   .sheet:last-child { page-break-after: auto; }
   .chip { border: 0.35mm dashed #999; padding: 1.5mm 2mm 2mm; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; overflow: hidden; break-inside: avoid; }  /* gestrichelte Linie = Schneidelinie, Karte 36 x 66 mm */
   .c-glue { width: 100%; border-bottom: 0.25mm dotted #ccc; margin-bottom: 1.1mm; flex: none; }  /* Klebefläche oben */
@@ -175,7 +184,7 @@ footer a { color: var(--muted); text-decoration: underline; cursor: pointer; }
   </nav>
   <nav class="nav-row2">
     <button id="speakBtn" type="button" aria-pressed="false">🔊 Vorlesen</button>
-    <button class="print-btn" id="printBtn" type="button">▤ Druckvorlage (30 pro A4)</button>
+    <button class="print-btn" id="printBtn" type="button">▤ Druckvorlage (20 pro A4)</button>
   </nav>
   <footer>
     <div class="row1">
@@ -206,8 +215,8 @@ footer a { color: var(--muted); text-decoration: underline; cursor: pointer; }
   <h3>IMPRESSUM</h3>
   <p><strong>Ella Pinorella Verlag · Katharina Schütz</strong><br>Herausgeberin und inhaltlich Verantwortliche<br>Platz der Einheit 10 · 14467 Potsdam · Deutschland<br>E-Mail: info@ella-pinorella.de</p>
   <p><strong>Über dieses Hosentaschenbuch (HTB)</strong></p>
-  <p>„Nathalies HTB · 2027 – Der Jahresband“<br>365 Karten für alle Tage des Jahres 2027 – jeder Tag eine Episode deines Lebens.<br>Ein Geschenk von Deiner Mutti.</p>
-  <p>Aus dem Episoden-Rechner entstanden, jetzt als Kalenderband für 2027.<br>Mit schönen Sprüchen und Aphorismen: aus der Sammlung ihrer Mutter und Klassikern von Twain, Goethe, Schiller, Kästner, Fontane u. a.</p>
+  <p>„Nathalies HTB · 2027 – Der Jahresband“<br>365 Karten für alle Tage des Jahres 2027 – jeder Tag eine Episode deines Lebens.<br>Ein Geschenk von deiner Mutti.</p>
+  <p>Aus dem Episoden-Rechner entstanden, jetzt als Kalenderband für 2027.<br>Mit schönen Sprüchen und Aphorismen: Klassiker von Twain, Goethe, Schiller, Kästner, Fontane u. a. – und ganz zum Schluss einige Sprüche von Katharina.</p>
   <p>Ein Hosentaschenbuch nach dem Lernkonzept ARC(E)ANA – Entdecken. Entwickeln. Erschaffen.</p>
   <p>© 2026 Ella Pinorella Verlag · Katharina Schütz</p>
   <button onclick="closeDlg('dlgImp')">Schließen</button>
@@ -249,7 +258,7 @@ const BIRTHDAYS = [
   { d: 25, m: 5, y: 2020, name: 'Alaistair Meinhard Zimmermann' },
   { d: 5, m: 6, y: 1995, name: 'Lisa Julanta Rath' },
   { d: 17, m: 6, y: 1983, name: 'Marco Thomas Schütz' },
-  { d: 26, m: 6, y: 1974, name: 'Steffen Rath' },
+  { d: 26, m: 6, y: 1975, name: 'Steffen Rath' },
   { d: 2, m: 7, y: 1984, name: 'Robin Rath' },
   { d: 25, m: 7, y: 1974, name: 'Michael Rath' },
   { d: 29, m: 7, y: 1960, name: 'Katharina Schütz' },
@@ -259,7 +268,7 @@ const BIRTHDAYS = [
   { d: 19, m: 8, y: 1981, name: 'Linda Rath' },
   { d: 24, m: 8, y: 1963, name: 'Simone Carmen Rath' },
   { d: 2, m: 9, y: 1939, name: 'Jürgen Tabbert' },
-  { d: 17, m: 9, y: 1957, name: 'Martina Rath' },
+  { d: 17, m: 9, y: 1958, name: 'Martina Rath' },
   { d: 17, m: 9, y: 1960, name: 'Andrea Zimmermann' },
   { d: 5, m: 10, y: 1929, name: 'Kurt Werner Schütz' },
   { d: 8, m: 10, y: 1934, name: 'Annemarie Olga Schütz' },
@@ -317,6 +326,31 @@ function eventsFor(i) {
 function fmt(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
 function dateStr(d) { return WDS[d.getDay()] + ' · ' + String(d.getDate()).padStart(2, '0') + '.' + String(d.getMonth() + 1).padStart(2, '0') + '.' + d.getFullYear(); }
 const nb = t => t.replace(/(\d{1,2}\.)\s+(Januar|Februar|März|April|Mai|Juni|Juli|August|September|Oktober|November|Dezember)/g, '$1\u00A0$2');
+const FANFARE = { d: 19, m: 5 };  // 19. Mai – Nathalies Geburtstag
+function playFanfare() {
+  try {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    const ctx = new AC();
+    const now = ctx.currentTime;
+    const notes = [
+      { f: 392.00, t: 0.00, d: 0.16 },
+      { f: 523.25, t: 0.16, d: 0.16 },
+      { f: 659.25, t: 0.32, d: 0.16 },
+      { f: 783.99, t: 0.48, d: 0.55 }
+    ];
+    notes.forEach(n => {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = 'square'; o.frequency.value = n.f;
+      g.gain.setValueAtTime(0.0001, now + n.t);
+      g.gain.exponentialRampToValueAtTime(0.15, now + n.t + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, now + n.t + n.d);
+      o.connect(g); g.connect(ctx.destination);
+      o.start(now + n.t); o.stop(now + n.t + n.d + 0.05);
+    });
+    setTimeout(() => { try { ctx.close(); } catch (e) {} }, 1500);
+  } catch (e) {}
+}
 function render() {
   const c = cards[index];
   document.getElementById('counter').textContent = 'TAG ' + String(index + 1).padStart(2, '0') + ' VON ' + cards.length + '  ·  EPISODE ' + fmt(c.ep);
@@ -328,6 +362,7 @@ function render() {
   const badge = document.getElementById('bdBadge');
   if (ev.length) { badge.innerHTML = ev.map(e => e.text).join('<br>'); badge.classList.add('show'); }
   else badge.classList.remove('show');
+  if (c.d.getDate() === FANFARE.d && c.d.getMonth() === FANFARE.m - 1) playFanfare();
 }
 function numWords(n) {
   const ones = ['','ein','zwei','drei','vier','fünf','sechs','sieben','acht','neun','zehn','elf','zwölf','dreizehn','vierzehn','fünfzehn','sechzehn','siebzehn','achtzehn','neunzehn'];
