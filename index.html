@@ -106,8 +106,8 @@ footer a { color: var(--muted); text-decoration: underline; cursor: pointer; }
   .studio-panel { display: none !important; }
   .start { display: none !important; }
   .print-only { display: block !important; width: 194mm !important; max-width: 194mm !important; margin: 0 !important; }
-  .print-heading { display: flex; align-items: center; justify-content: space-between; font-size: 8pt; color: #555; font-weight: 700; padding: 0 0 1mm; width: 192mm; margin: 0; }
-  .sheet { display: grid; grid-template-columns: repeat(5, 36mm); grid-auto-rows: 66mm; gap: 1mm 2.6mm; padding: 0 0 2mm; width: 192mm; margin: 0; page-break-after: always; position: relative; box-sizing: content-box; }
+  .print-heading { display: flex; align-items: center; justify-content: space-between; font-size: 7pt; line-height: 1.1; color: #555; font-weight: 700; padding: 0 0 0.8mm; width: 192mm; margin: 0; }
+  .sheet { display: grid; grid-template-columns: repeat(5, 36mm); grid-auto-rows: 66mm; gap: 0.5mm 2.6mm; padding: 0 0 1mm; width: 192mm; margin: 0; page-break-after: always; position: relative; box-sizing: content-box; }
   .sheet:last-child { page-break-after: auto; }
   .chip { border: 0.35mm dashed #999; padding: 1.5mm 2mm 2mm; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; overflow: hidden; break-inside: avoid; }  /* gestrichelte Linie = Schneidelinie, Karte 36 x 66 mm */
   .c-glue { width: 100%; border-bottom: 0.25mm dotted #ccc; margin-bottom: 1.1mm; flex: none; }  /* Klebefläche oben */
@@ -124,7 +124,7 @@ footer a { color: var(--muted); text-decoration: underline; cursor: pointer; }
   .chip.lg .de { font-size: 7pt; }
   .chip.xl .de { font-size: 6.4pt; }
   .chip.lg .eng { font-size: 8.4pt; } .chip.xl .eng { font-size: 7.4pt; }
-  .sheet-footer { position: absolute; bottom: 0.5mm; left: 0; width: 100%; text-align: center; font-size: 6pt; color: #aaa; }  /* im unteren Randbereich, ohne Kartenreihe */
+  .sheet-footer { position: absolute; bottom: 0; left: 0; width: 100%; text-align: center; font-size: 6pt; line-height: 1; color: #aaa; }  /* im unteren Randbereich, ohne Kartenreihe */
   .chip.cv { background: linear-gradient(160deg, #101c36 0%, #1b2a4a 45%, #2a52be 100%); border: 0.35mm dashed #999; }  /* Deckblatt als kleine Karte */
   .chip.cv .c-glue { border-bottom: 0.25mm dotted rgba(231,194,106,.6); }
   .cv-label2 { font-size: 4.4pt; font-weight: 700; letter-spacing: .18em; color: #dbe6ff; line-height: 1.5; }
@@ -164,7 +164,7 @@ footer a { color: var(--muted); text-decoration: underline; cursor: pointer; }
 <main class="app">
   <header class="top">
     <h1 id="titleBtn" title="Deckblatt öffnen" style="cursor:pointer">Nathalies HTB · 2027</h1>
-    <p>Jahresband · ♉ · 365 Tage des Jahres 2027<br>Version 1.9.5</p>
+    <p>Jahresband · ♉ · 365 Tage des Jahres 2027<br>Version 2.9.9</p>
   </header>
   <div class="counter" id="counter">TAG 01 VON 365  ·  EPISODE 14.473</div>
   <section class="card" id="studyCard" aria-live="polite">
