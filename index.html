@@ -52,28 +52,31 @@ footer a { color: var(--muted); text-decoration: underline; cursor: pointer; }
 .dlg { background: #fff; border-radius: 18px; padding: 22px; max-width: 400px; width: 100%; box-shadow: 0 20px 50px rgba(0,0,0,.3); max-height: 86vh; overflow-y: auto; }
 .cal-btn { position: absolute; top: 10px; left: 12px; width: 36px; height: 36px; border-radius: 10px; border: 1.5px solid var(--gold); background: var(--blue2); color: #fff; font-size: 18px; line-height: 1; cursor: pointer; box-shadow: 0 3px 10px rgba(27,42,74,.3); z-index: 5; }
 .cal-btn:hover { background: var(--gold); color: #1b2a4a; }
-.dlg.cal { max-width: 760px; display: flex; flex-direction: column; padding: 14px 16px; }
+.dlg.cal { max-width: 480px; display: flex; flex-direction: column; padding: 14px 16px; overflow: hidden; }
 .dlg.cal h3 { margin: 0 0 4px; }
 .cal-hint { font-size: .72rem; color: #667; margin: 0 0 10px; flex: none; }
-.cal-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; overflow-y: auto; flex: 1 1 auto; min-height: 0; }
+.cal-scroll { height: 56vh; max-height: 430px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.cal-grid { display: block; padding: 2px; }
+.cal-m { margin: 0 0 16px; }
+.cal-m h4 { text-align: center; font-size: .7rem; letter-spacing: .06em; text-transform: uppercase; color: #1b2a4a; margin: 0 0 5px; }
+.cal-w { display: grid; grid-template-columns: repeat(7, 40px); gap: 6px; margin: 0 auto 4px; width: 316px; }
+.cal-w span { display: block; height: 16px; line-height: 16px; font-size: .54rem; font-weight: 700; color: #99a; text-align: center; }
+.cal-d { display: grid; grid-template-columns: repeat(7, 40px); gap: 6px; margin: 0 auto; width: 316px; }
+.cal-d .blank { display: block; width: 40px; height: 40px; visibility: hidden; }
+.cal-d button { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border: 0; border-radius: 8px; background: #eef1fa; color: #1b2a4a; font-size: .7rem; font-weight: 600; font-family: inherit; cursor: pointer; position: relative; padding: 0; margin: 0; box-sizing: border-box; }
+.cal-d button.sun { color: #b04040; background: #f9eff0; }
+.cal-d button.ev::after { content: '✦'; position: absolute; bottom: 1px; left: 50%; transform: translateX(-50%); font-size: .4rem; color: var(--gold); }
+.cal-d button:hover { background: var(--gold); color: #1b2a4a; }
 .dlg.cal > button { flex: none; margin-top: 12px; }
 @media (max-width: 680px) {
-  .cal-grid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
-  .cal-m h4 { font-size: .56rem; letter-spacing: .04em; margin: 0 0 2px; }
-  .cal-w span { font-size: .46rem; }
-  .cal-d { gap: 1px; }
-  .cal-d button { font-size: .54rem; }
-  .cal-d button.ev::after { font-size: .3rem; bottom: -1px; }
+  .cal-m h4 { font-size: .6rem; margin: 0 0 4px; }
+  .cal-w { grid-template-columns: repeat(7, 36px); gap: 4px; width: 276px; }
+  .cal-w span { height: 15px; line-height: 15px; font-size: .48rem; }
+  .cal-d { grid-template-columns: repeat(7, 36px); gap: 4px; width: 276px; }
+  .cal-d .blank { width: 36px; height: 36px; }
+  .cal-d button { width: 36px; height: 36px; font-size: .64rem; border-radius: 7px; }
+  .cal-d button.ev::after { font-size: .34rem; }
 }
-.cal-m h4 { text-align: center; font-size: .66rem; letter-spacing: .06em; text-transform: uppercase; color: #1b2a4a; margin: 0 0 4px; position: sticky; top: 0; background: #fff; padding: 2px 0; z-index: 2; }
-.cal-w { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; margin-bottom: 2px; }
-.cal-w span { font-size: .54rem; font-weight: 700; color: #99a; text-align: center; }
-.cal-d { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
-.cal-d .blank { visibility: hidden; }
-.cal-d button { aspect-ratio: 1; border: 0; border-radius: 6px; background: #eef1fa; color: #1b2a4a; font-size: .64rem; font-weight: 500; font-family: inherit; cursor: pointer; position: relative; padding: 0; }
-.cal-d button.sun { color: #b04040; background: #f9eff0; }
-.cal-d button.ev::after { content: '✦'; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); font-size: .4rem; color: var(--gold); }
-.cal-d button:hover { background: var(--gold); color: #1b2a4a; }
 .dlg h3 { margin: 0 0 10px; color: var(--blue2); }
 .dlg p { font-size: .85rem; line-height: 1.45; margin: 0 0 10px; }
 .dlg button { margin-top: 6px; border: 0; border-radius: 12px; padding: 10px 20px; font-weight: 700; background: var(--blue2); color: #fff; }
@@ -161,7 +164,7 @@ footer a { color: var(--muted); text-decoration: underline; cursor: pointer; }
 <main class="app">
   <header class="top">
     <h1 id="titleBtn" title="Deckblatt öffnen" style="cursor:pointer">Nathalies HTB · 2027</h1>
-    <p>Jahresband · ♉ · 365 Tage des Jahres 2027<br>Version 2.9.7</p>
+    <p>Jahresband · ♉ · 365 Tage des Jahres 2027<br>Version 1.9.5</p>
   </header>
   <div class="counter" id="counter">TAG 01 VON 365  ·  EPISODE 14.473</div>
   <section class="card" id="studyCard" aria-live="polite">
@@ -236,7 +239,7 @@ footer a { color: var(--muted); text-decoration: underline; cursor: pointer; }
 <div class="overlay" id="dlgCal"><div class="dlg cal">
   <h3>📅 Kalender 2027 – Tag wählen</h3>
   <p class="cal-hint">Tippe auf ein Datum – das Buch springt direkt zu dieser Karte. ✦ = Tag mit Familien-Ereignis (🎂 oder 🕯️), Sonntage in Rot.</p>
-  <div class="cal-grid" id="calGrid"></div>
+  <div class="cal-scroll"><div class="cal-grid" id="calGrid"></div></div>
   <button onclick="closeDlg('dlgCal')">Schließen</button>
 </div></div>
 <section class="print-only" id="printArea" aria-label="Druckvorlage"></section>
@@ -326,29 +329,42 @@ function eventsFor(i) {
 function fmt(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
 function dateStr(d) { return WDS[d.getDay()] + ' · ' + String(d.getDate()).padStart(2, '0') + '.' + String(d.getMonth() + 1).padStart(2, '0') + '.' + d.getFullYear(); }
 const nb = t => t.replace(/(\d{1,2}\.)\s+(Januar|Februar|März|April|Mai|Juni|Juli|August|September|Oktober|November|Dezember)/g, '$1\u00A0$2');
-const FANFARE = { d: 19, m: 5 };  // 19. Mai – Nathalies Geburtstag
+const FANFARE = { d: 19, m: 5 };  // 19. Mai - Geburtstag
 function playFanfare() {
   try {
     const AC = window.AudioContext || window.webkitAudioContext;
     if (!AC) return;
     const ctx = new AC();
     const now = ctx.currentTime;
+    // Mozarts Melodie aus der Zauberflote (Papagenos Glockenspiel):
+    // Ueb' immer Treu und Redlichkeit bis an dein kuhles Grab
     const notes = [
       { f: 392.00, t: 0.00, d: 0.16 },
-      { f: 523.25, t: 0.16, d: 0.16 },
-      { f: 659.25, t: 0.32, d: 0.16 },
-      { f: 783.99, t: 0.48, d: 0.55 }
+      { f: 523.25, t: 0.16, d: 0.22 },
+      { f: 523.25, t: 0.38, d: 0.22 },
+      { f: 587.33, t: 0.60, d: 0.22 },
+      { f: 587.33, t: 0.82, d: 0.22 },
+      { f: 659.25, t: 1.04, d: 0.22 },
+      { f: 587.33, t: 1.26, d: 0.22 },
+      { f: 523.25, t: 1.48, d: 0.30 },
+      { f: 587.33, t: 1.86, d: 0.22 },
+      { f: 659.25, t: 2.08, d: 0.22 },
+      { f: 698.46, t: 2.30, d: 0.22 },
+      { f: 659.25, t: 2.52, d: 0.22 },
+      { f: 587.33, t: 2.74, d: 0.22 },
+      { f: 523.25, t: 2.96, d: 0.60 }
     ];
     notes.forEach(n => {
       const o = ctx.createOscillator(), g = ctx.createGain();
-      o.type = 'square'; o.frequency.value = n.f;
+      o.type = 'triangle';
+      o.frequency.value = n.f;
       g.gain.setValueAtTime(0.0001, now + n.t);
       g.gain.exponentialRampToValueAtTime(0.15, now + n.t + 0.02);
       g.gain.exponentialRampToValueAtTime(0.0001, now + n.t + n.d);
       o.connect(g); g.connect(ctx.destination);
       o.start(now + n.t); o.stop(now + n.t + n.d + 0.05);
     });
-    setTimeout(() => { try { ctx.close(); } catch (e) {} }, 1500);
+    setTimeout(() => { try { ctx.close(); } catch (e) {} }, 5000);
   } catch (e) {}
 }
 function render() {
